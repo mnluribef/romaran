@@ -155,6 +155,16 @@
                         </div>
                         <p class="product-desc">Franelas de alta calidad con estampados full color que resisten el paso
                             del tiempo.</p>
+                        
+                        <div class="product-options">
+                            <span>Talla:</span>
+                            <div class="size-selector" data-product="franela">
+                                <button class="size-btn active" data-size="S">S</button>
+                                <button class="size-btn" data-size="M">M</button>
+                                <button class="size-btn" data-size="L">L</button>
+                                <button class="size-btn" data-size="XL">XL</button>
+                            </div>
+                        </div>
                         <div class="product-actions">
                             <div class="main-qty-selector">
                                 <button class="qty-btn-main minus" data-id="franela">-</button>
@@ -176,7 +186,7 @@
                             <h3>Tazas</h3>
                             <i data-lucide="coffee"></i>
                         </div>
-                        <p class="product-desc">Tazas de cerámica premium, perfectas para regalos corporativos o
+                        <p class="product-desc">Tazas de cerámica premium, perfectas para regalos o
                             detalles especiales.</p>
                         <div class="product-actions">
                             <div class="main-qty-selector">
@@ -510,6 +520,19 @@
 
     <!-- Toast Container -->
     <div id="toast-container" class="toast-container"></div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-icon"><i data-lucide="alert-triangle"></i></div>
+            <h3>¿Vaciar Carrito?</h3>
+            <p>Se eliminarán todos los artículos de tu pedido actual. Esta acción no se puede deshacer.</p>
+            <div class="modal-actions">
+                <button id="modal-cancel" class="modal-btn secondary">Cancelar</button>
+                <button id="modal-confirm" class="modal-btn danger">Vaciar Pedido</button>
+            </div>
+        </div>
+    </div>
 
     <script src="main.js"></script>
     <script>

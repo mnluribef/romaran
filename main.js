@@ -94,6 +94,10 @@ const cartCountBadge = document.getElementById('cart-count');
 const whatsappOrderBtn = document.getElementById('whatsapp-order-btn');
 const clearCartBtn = document.getElementById('clear-cart');
 
+const confirmModal = document.getElementById('confirm-modal');
+const modalCancel = document.getElementById('modal-cancel');
+const modalConfirm = document.getElementById('modal-confirm');
+
 // Toggle Cart
 const toggleCart = () => {
     cartDrawer.classList.toggle('active');
@@ -107,20 +111,30 @@ if (cartBtn) cartBtn.addEventListener('click', toggleCart);
 if (closeCartBtn) closeCartBtn.addEventListener('click', toggleCart);
 if (cartOverlay) cartOverlay.addEventListener('click', toggleCart);
 
-// Clear Cart
-const clearCart = () => {
+// Custom Confirm Modal Logic
+const showConfirmModal = () => {
     if (cart.length === 0) return;
-    
-    if (confirm('¿Estás seguro de que quieres vaciar tu pedido?')) {
-        cart = [];
-        saveCart();
-        renderCart();
-        updateCartCount();
-        showToast('Carrito vaciado');
-    }
+    confirmModal.classList.add('active');
 };
 
-if (clearCartBtn) clearCartBtn.addEventListener('click', clearCart);
+const hideConfirmModal = () => {
+    confirmModal.classList.remove('active');
+};
+
+if (clearCartBtn) clearCartBtn.addEventListener('click', showConfirmModal);
+if (modalCancel) modalCancel.addEventListener('click', hideConfirmModal);
+if (confirmModal) confirmModal.addEventListener('click', (e) => {
+    if (e.target === confirmModal) hideConfirmModal();
+});
+
+if (modalConfirm) modalConfirm.addEventListener('click', () => {
+    cart = [];
+    saveCart();
+    renderCart();
+    updateCartCount();
+    hideConfirmModal();
+    showToast('Carrito vaciado');
+});
 
 // Add to Cart
 // Icon Mapping Fallback for existing items
@@ -133,22 +147,28 @@ const iconMap = {
     "Llavero / Lanyard": "link"
 };
 
-const addToCart = (name, quantity = 1, icon = 'package') => {
+const addToCart = (name, quantity = 1, icon = 'package', options = {}) => {
     const qty = parseInt(quantity);
-    const existingItem = cart.find(item => item.name === name);
+    
+    // Create a unique key based on name and options (like size)
+    const optionsKey = Object.values(options).join('-');
+    const itemKey = optionsKey ? `${name}-${optionsKey}` : name;
+
+    const existingItem = cart.find(item => item.key === itemKey);
     
     // Use mapped icon if provided icon is default
     const finalIcon = (icon === 'package' && iconMap[name]) ? iconMap[name] : icon;
 
     if (existingItem) {
         existingItem.qty += qty;
-        existingItem.icon = finalIcon; // Update icon just in case
     } else {
-        cart.push({ name, qty: qty, icon: finalIcon });
+        cart.push({ key: itemKey, name, qty: qty, icon: finalIcon, options: options });
     }
     saveCart();
     updateCartCount();
-    showToast(`¡Añadido ${qty}x ${name}!`);
+    
+    const optionText = options.size ? ` (Talla ${options.size})` : "";
+    showToast(`¡Añadido ${qty}x ${name}${optionText}!`);
 };
 
 // Toast System
@@ -173,20 +193,20 @@ const showToast = (message) => {
 };
 
 // Remove from Cart
-const removeFromCart = (name) => {
-    cart = cart.filter(item => item.name !== name);
+const removeFromCart = (key) => {
+    cart = cart.filter(item => item.key !== key);
     saveCart();
     renderCart();
     updateCartCount();
 };
 
 // Update Qty
-const updateQty = (name, delta) => {
-    const item = cart.find(item => item.name === name);
+const updateQty = (key, delta) => {
+    const item = cart.find(item => item.key === key);
     if (item) {
         item.qty += delta;
         if (item.qty <= 0) {
-            removeFromCart(name);
+            removeFromCart(key);
         } else {
             saveCart();
             renderCart();
@@ -221,19 +241,24 @@ const renderCart = () => {
     if (whatsappOrderBtn) whatsappOrderBtn.disabled = false;
     cartItemsContainer.innerHTML = cart.map(item => {
         const icon = item.icon && item.icon !== 'package' ? item.icon : (iconMap[item.name] || 'package');
+        const sizeText = item.options && item.options.size ? `<span class="cart-item-option">Talla: ${item.options.size}</span>` : "";
+        
         return `
             <div class="cart-item">
                 <div class="item-info">
                     <div class="item-title-row">
                         <i data-lucide="${icon}" class="item-icon"></i>
-                        <h4>${item.name}</h4>
+                        <div class="item-details">
+                            <h4>${item.name}</h4>
+                            ${sizeText}
+                        </div>
                     </div>
                 </div>
                 <div class="item-qty">
-                    <button class="qty-btn" onclick="updateQty('${item.name}', -1)">-</button>
+                    <button class="qty-btn" onclick="updateQty('${item.key || item.name}', -1)">-</button>
                     <span>${item.qty}</span>
-                    <button class="qty-btn" onclick="updateQty('${item.name}', 1)">+</button>
-                    <button class="remove-item" onclick="removeFromCart('${item.name}')">
+                    <button class="qty-btn" onclick="updateQty('${item.key || item.name}', 1)">+</button>
+                    <button class="remove-item" onclick="removeFromCart('${item.key || item.name}')">
                         <i data-lucide="trash-2"></i>
                     </button>
                 </div>
@@ -251,7 +276,8 @@ if (whatsappOrderBtn) {
         let message = "¡Hola Romaran Subli! 👋\n\nMe gustaría realizar un pedido con los siguientes productos:\n\n";
 
         cart.forEach(item => {
-            message += `✅ ${item.qty}x ${item.name}\n`;
+            const size = item.options && item.options.size ? ` [Talla: ${item.options.size}]` : "";
+            message += `✅ ${item.qty}x ${item.name}${size}\n`;
         });
 
         const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -261,6 +287,15 @@ if (whatsappOrderBtn) {
         window.open(whatsappUrl, '_blank');
     });
 }
+
+// Event Listeners for Sizes
+document.querySelectorAll('.size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const parent = btn.parentElement;
+        parent.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    });
+});
 
 // Event Listeners for Landing Page Qty Selectors
 document.querySelectorAll('.qty-btn-main').forEach(btn => {
@@ -288,7 +323,17 @@ document.querySelectorAll('.add-to-cart').forEach(btn => {
         const input = document.getElementById(inputId);
         const quantity = input ? input.value : 1;
         
-        addToCart(productName, quantity, iconName);
+        const options = {};
+        // Check if there are size options for this product
+        const productCard = btn.closest('.product-card');
+        if (productCard) {
+            const activeSize = productCard.querySelector('.size-btn.active');
+            if (activeSize) {
+                options.size = activeSize.getAttribute('data-size');
+            }
+        }
+        
+        addToCart(productName, quantity, iconName, options);
         
         // Reset input to 1 after adding
         if (input) input.value = 1;
