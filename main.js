@@ -54,12 +54,6 @@ const initSlider = () => {
     setInterval(nextSlide, slideInterval);
 };
 
-// Initial call to reveal elements on load
-window.addEventListener('load', () => {
-    reveal();
-    initSlider();
-});
-
 // Mobile menu toggle
 const mobileMenuBtn = document.getElementById('mobile-menu-btn');
 const navLinks = document.querySelector('.nav-links');
@@ -86,3 +80,228 @@ if (mobileMenuBtn && navLinks) {
         });
     });
 }
+
+// --- Shopping Cart Logic ---
+
+let cart = JSON.parse(localStorage.getItem('romaran_cart')) || [];
+
+const cartBtn = document.getElementById('cart-btn');
+const closeCartBtn = document.getElementById('close-cart');
+const cartDrawer = document.getElementById('cart-drawer');
+const cartOverlay = document.getElementById('cart-overlay');
+const cartItemsContainer = document.getElementById('cart-items');
+const cartCountBadge = document.getElementById('cart-count');
+const whatsappOrderBtn = document.getElementById('whatsapp-order-btn');
+const clearCartBtn = document.getElementById('clear-cart');
+
+// Toggle Cart
+const toggleCart = () => {
+    cartDrawer.classList.toggle('active');
+    cartOverlay.classList.toggle('active');
+    if (cartDrawer.classList.contains('active')) {
+        renderCart();
+    }
+};
+
+if (cartBtn) cartBtn.addEventListener('click', toggleCart);
+if (closeCartBtn) closeCartBtn.addEventListener('click', toggleCart);
+if (cartOverlay) cartOverlay.addEventListener('click', toggleCart);
+
+// Clear Cart
+const clearCart = () => {
+    if (cart.length === 0) return;
+    
+    if (confirm('¿Estás seguro de que quieres vaciar tu pedido?')) {
+        cart = [];
+        saveCart();
+        renderCart();
+        updateCartCount();
+        showToast('Carrito vaciado');
+    }
+};
+
+if (clearCartBtn) clearCartBtn.addEventListener('click', clearCart);
+
+// Add to Cart
+// Icon Mapping Fallback for existing items
+const iconMap = {
+    "Franela Personalizada": "shirt",
+    "Taza Sublimada": "coffee",
+    "Gorra Personalizada": "crown",
+    "Vinil Textil": "scissors",
+    "Pop Socket": "circle-dot",
+    "Llavero / Lanyard": "link"
+};
+
+const addToCart = (name, quantity = 1, icon = 'package') => {
+    const qty = parseInt(quantity);
+    const existingItem = cart.find(item => item.name === name);
+    
+    // Use mapped icon if provided icon is default
+    const finalIcon = (icon === 'package' && iconMap[name]) ? iconMap[name] : icon;
+
+    if (existingItem) {
+        existingItem.qty += qty;
+        existingItem.icon = finalIcon; // Update icon just in case
+    } else {
+        cart.push({ name, qty: qty, icon: finalIcon });
+    }
+    saveCart();
+    updateCartCount();
+    showToast(`¡Añadido ${qty}x ${name}!`);
+};
+
+// Toast System
+const showToast = (message) => {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `
+        <i data-lucide="check-circle" style="color: #25D366"></i>
+        <span>${message}</span>
+    `;
+    
+    container.appendChild(toast);
+    lucide.createIcons();
+
+    // Remove toast after animation
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+};
+
+// Remove from Cart
+const removeFromCart = (name) => {
+    cart = cart.filter(item => item.name !== name);
+    saveCart();
+    renderCart();
+    updateCartCount();
+};
+
+// Update Qty
+const updateQty = (name, delta) => {
+    const item = cart.find(item => item.name === name);
+    if (item) {
+        item.qty += delta;
+        if (item.qty <= 0) {
+            removeFromCart(name);
+        } else {
+            saveCart();
+            renderCart();
+            updateCartCount();
+        }
+    }
+};
+
+// Save to LocalStorage
+const saveCart = () => {
+    localStorage.setItem('romaran_cart', JSON.stringify(cart));
+};
+
+// Update Badge Count
+const updateCartCount = () => {
+    if (cartCountBadge) {
+        const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+        cartCountBadge.textContent = totalItems;
+    }
+};
+
+// Render Cart UI
+const renderCart = () => {
+    if (!cartItemsContainer) return;
+
+    if (cart.length === 0) {
+        cartItemsContainer.innerHTML = '<div class="empty-cart-msg">Tu carrito está vacío</div>';
+        if (whatsappOrderBtn) whatsappOrderBtn.disabled = true;
+        return;
+    }
+
+    if (whatsappOrderBtn) whatsappOrderBtn.disabled = false;
+    cartItemsContainer.innerHTML = cart.map(item => {
+        const icon = item.icon && item.icon !== 'package' ? item.icon : (iconMap[item.name] || 'package');
+        return `
+            <div class="cart-item">
+                <div class="item-info">
+                    <div class="item-title-row">
+                        <i data-lucide="${icon}" class="item-icon"></i>
+                        <h4>${item.name}</h4>
+                    </div>
+                </div>
+                <div class="item-qty">
+                    <button class="qty-btn" onclick="updateQty('${item.name}', -1)">-</button>
+                    <span>${item.qty}</span>
+                    <button class="qty-btn" onclick="updateQty('${item.name}', 1)">+</button>
+                    <button class="remove-item" onclick="removeFromCart('${item.name}')">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    lucide.createIcons();
+};
+
+// Send Order to WhatsApp
+if (whatsappOrderBtn) {
+    whatsappOrderBtn.addEventListener('click', () => {
+        const phoneNumber = "584124756191";
+        let message = "¡Hola Romaran Subli! 👋\n\nMe gustaría realizar un pedido con los siguientes productos:\n\n";
+
+        cart.forEach(item => {
+            message += `✅ ${item.qty}x ${item.name}\n`;
+        });
+
+        const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+        message += `\n*Total de artículos:* ${totalItems}\n\n📎 *Adjunto a continuación los archivos (PDF/Imágenes) para mi diseño.*`;
+
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+    });
+}
+
+// Event Listeners for Landing Page Qty Selectors
+document.querySelectorAll('.qty-btn-main').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const input = document.getElementById(`qty-${id}`);
+        if (!input) return;
+
+        let val = parseInt(input.value);
+        if (btn.classList.contains('plus')) {
+            val++;
+        } else if (btn.classList.contains('minus') && val > 1) {
+            val--;
+        }
+        input.value = val;
+    });
+});
+
+// Event Listeners for "Add to Cart" buttons
+document.querySelectorAll('.add-to-cart').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const productName = btn.getAttribute('data-name');
+        const inputId = btn.getAttribute('data-input');
+        const iconName = btn.getAttribute('data-icon');
+        const input = document.getElementById(inputId);
+        const quantity = input ? input.value : 1;
+        
+        addToCart(productName, quantity, iconName);
+        
+        // Reset input to 1 after adding
+        if (input) input.value = 1;
+    });
+});
+
+// Initial load
+window.addEventListener('load', () => {
+    reveal();
+    initSlider();
+    updateCartCount();
+});
+
+// Expose functions to global scope for onclick handlers
+window.updateQty = updateQty;
+window.removeFromCart = removeFromCart;

@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROMARAN SUBLII | Personaliza tu Mundo</title>
+    <title>ROMARAN SUBLI | Personaliza tu Mundo</title>
     <meta name="description"
-        content="ROMARAN SUBLII: Expertos en sublimación. Franelas, tazas, gorras, llaveros y más productos personalizados con la mejor calidad y colores vibrantes.">
+        content="ROMARAN SUBLI: Expertos en sublimación. Franelas, tazas, gorras, llaveros y más productos personalizados con la mejor calidad y colores vibrantes.">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/favicon.png">
@@ -15,15 +15,16 @@
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.instagram.com/romaransubli/">
-    <meta property="og:title" content="ROMARAN SUBLII | Personaliza tu Mundo">
+    <meta property="og:title" content="ROMARAN SUBLI | Personaliza tu Mundo">
     <meta property="og:description"
         content="Expertos en sublimación. Franelas, tazas, gorras, llaveros y más productos personalizados con la mejor calidad.">
     <meta property="og:image" content="assets/og-image.png">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="ROMARAN SUBLII | Personaliza tu Mundo">
-    <meta name="twitter:description" content="Expertos en sublimación. Productos personalizados con colores vibrantes y calidad premium.">
+    <meta name="twitter:title" content="ROMARAN SUBLI | Personaliza tu Mundo">
+    <meta name="twitter:description"
+        content="Expertos en sublimación. Productos personalizados con colores vibrantes y calidad premium.">
     <meta name="twitter:image" content="assets/og-image.png">
 
     <!-- Lucide Icons -->
@@ -154,8 +155,14 @@
                         </div>
                         <p class="product-desc">Franelas de alta calidad con estampados full color que resisten el paso
                             del tiempo.</p>
-                        <a href="https://wa.me/584126902476?text=Hola!%20Deseo%20cotizar%20franelas%20personalizadas"
-                            class="cta-btn product-cta" target="_blank">Cotizar</a>
+                        <div class="product-actions">
+                            <div class="main-qty-selector">
+                                <button class="qty-btn-main minus" data-id="franela">-</button>
+                                <input type="number" value="1" min="1" id="qty-franela" class="qty-input">
+                                <button class="qty-btn-main plus" data-id="franela">+</button>
+                            </div>
+                            <button class="cta-btn product-cta add-to-cart" data-name="Franela Personalizada" data-input="qty-franela" data-icon="shirt">Agregar</button>
+                        </div>
                     </div>
                 </div>
 
@@ -171,8 +178,14 @@
                         </div>
                         <p class="product-desc">Tazas de cerámica premium, perfectas para regalos corporativos o
                             detalles especiales.</p>
-                        <a href="https://wa.me/584126902476?text=Hola!%20Deseo%20cotizar%20tazas%20personalizadas"
-                            class="cta-btn product-cta" target="_blank">Cotizar</a>
+                        <div class="product-actions">
+                            <div class="main-qty-selector">
+                                <button class="qty-btn-main minus" data-id="taza">-</button>
+                                <input type="number" value="1" min="1" id="qty-taza" class="qty-input">
+                                <button class="qty-btn-main plus" data-id="taza">+</button>
+                            </div>
+                            <button class="cta-btn product-cta add-to-cart" data-name="Taza Sublimada" data-input="qty-taza" data-icon="coffee">Agregar</button>
+                        </div>
                     </div>
                 </div>
 
@@ -188,8 +201,14 @@
                         </div>
                         <p class="product-desc">Gorras con diseños únicos usando vinil textil o sublimación de la mejor
                             calidad.</p>
-                        <a href="https://wa.me/584126902476?text=Hola!%20Deseo%20cotizar%20gorras%20personalizadas"
-                            class="cta-btn product-cta" target="_blank">Cotizar</a>
+                        <div class="product-actions">
+                            <div class="main-qty-selector">
+                                <button class="qty-btn-main minus" data-id="gorra">-</button>
+                                <input type="number" value="1" min="1" id="qty-gorra" class="qty-input">
+                                <button class="qty-btn-main plus" data-id="gorra">+</button>
+                            </div>
+                            <button class="cta-btn product-cta add-to-cart" data-name="Gorra Personalizada" data-input="qty-gorra" data-icon="crown">Agregar</button>
+                        </div>
                     </div>
                 </div>
 
@@ -205,8 +224,14 @@
                         </div>
                         <p class="product-desc">Cortes precisos y aplicaciones duraderas para uniformes y moda urbana.
                         </p>
-                        <a href="https://wa.me/584126902476?text=Hola!%20Deseo%20información%20sobre%20Vinil%20Textil"
-                            class="cta-btn product-cta" target="_blank">Cotizar</a>
+                        <div class="product-actions">
+                            <div class="main-qty-selector">
+                                <button class="qty-btn-main minus" data-id="vinil">-</button>
+                                <input type="number" value="1" min="1" id="qty-vinil" class="qty-input">
+                                <button class="qty-btn-main plus" data-id="vinil">+</button>
+                            </div>
+                            <button class="cta-btn product-cta add-to-cart" data-name="Vinil Textil" data-input="qty-vinil" data-icon="scissors">Agregar</button>
+                        </div>
                     </div>
                 </div>
 
@@ -221,8 +246,14 @@
                             <i data-lucide="circle-dot"></i>
                         </div>
                         <p class="product-desc">Agarres para celulares con el logo de tu marca a todo color.</p>
-                        <a href="https://wa.me/584126902476?text=Hola!%20Deseo%20cotizar%20Pop%20Sockets"
-                            class="cta-btn product-cta" target="_blank">Cotizar</a>
+                        <div class="product-actions">
+                            <div class="main-qty-selector">
+                                <button class="qty-btn-main minus" data-id="pop">-</button>
+                                <input type="number" value="1" min="1" id="qty-pop" class="qty-input">
+                                <button class="qty-btn-main plus" data-id="pop">+</button>
+                            </div>
+                            <button class="cta-btn product-cta add-to-cart" data-name="Pop Socket" data-input="qty-pop" data-icon="circle-dot">Agregar</button>
+                        </div>
                     </div>
                 </div>
 
@@ -238,8 +269,14 @@
                         </div>
                         <p class="product-desc">Identificadores, cintas y llaveros ideales para eventos y merchandising.
                         </p>
-                        <a href="https://wa.me/584126902476?text=Hola!%20Deseo%20cotizar%20llaveros%20y%20lanyards"
-                            class="cta-btn product-cta" target="_blank">Cotizar</a>
+                        <div class="product-actions">
+                            <div class="main-qty-selector">
+                                <button class="qty-btn-main minus" data-id="lanyard">-</button>
+                                <input type="number" value="1" min="1" id="qty-lanyard" class="qty-input">
+                                <button class="qty-btn-main plus" data-id="lanyard">+</button>
+                            </div>
+                            <button class="cta-btn product-cta add-to-cart" data-name="Llavero / Lanyard" data-input="qty-lanyard" data-icon="link">Agregar</button>
+                        </div>
                     </div>
                 </div>
 
@@ -285,9 +322,11 @@
             <div class="testimonials-grid">
                 <div class="testimonial-card reveal">
                     <div class="stars">
-                        <i data-lucide="star" class="filled"></i><i data-lucide="star" class="filled"></i><i
-                            data-lucide="star" class="filled"></i><i data-lucide="star" class="filled"></i><i
-                            data-lucide="star" class="filled"></i>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
                     </div>
                     <p class="review">"Excelente calidad en las franelas para nuestro evento corporativo. Los colores
                         quedaron súper vibrantes."</p>
@@ -303,9 +342,11 @@
                 </div>
                 <div class="testimonial-card reveal">
                     <div class="stars">
-                        <i data-lucide="star" class="filled"></i><i data-lucide="star" class="filled"></i><i
-                            data-lucide="star" class="filled"></i><i data-lucide="star" class="filled"></i><i
-                            data-lucide="star" class="filled"></i>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
                     </div>
                     <p class="review">"Rápidos y muy profesionales. Los lanyards quedaron perfectos y a tiempo para el
                         congreso."</p>
@@ -321,9 +362,11 @@
                 </div>
                 <div class="testimonial-card reveal">
                     <div class="stars">
-                        <i data-lucide="star" class="filled"></i><i data-lucide="star" class="filled"></i><i
-                            data-lucide="star" class="filled"></i><i data-lucide="star" class="filled"></i><i
-                            data-lucide="star" class="filled"></i>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
+                        <svg viewBox="0 0 24 24" class="star-svg"><path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z"/></svg>
                     </div>
                     <p class="review">"Las tazas personalizadas fueron el mejor regalo. ¡La atención por WhatsApp fue de
                         primera!"</p>
@@ -400,7 +443,7 @@
                 <div class="footer-links">
                     <h4>Contacto</h4>
                     <ul>
-                        <li><a href="https://wa.me/584126902476" target="_blank" class="footer-contact-link"><svg
+                        <li><a href="https://wa.me/584124756191" target="_blank" class="footer-contact-link"><svg
                                     viewBox="0 0 24 24" width="16" height="16" fill="#25D366"
                                     style="display:inline; margin-right:4px;">
                                     <path
@@ -414,17 +457,49 @@
                                         d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.984 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.066.935 20.398.524 19.61.21 18.844.333 17.974.131 16.697.072 15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.58.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.27.07 1.646.07 4.85s-.015 3.58-.07 4.85c-.055 1.17-.249 1.805-.413 2.227-.217.562-.477.96-.896 1.382-.42.419-.819.679 1.381.896-.422.164 1.057-.36 2.227-.413 1.28-.057 1.656-.07 4.86-.07zm0 5.84a4 4 0 100 8 4 4 0 000-8zm0 6.16a2.16 2.16 0 110-4.32 2.16 2.16 0 010 4.32zm6.406-7.08a1.44 1.44 0 11-2.88 0 1.44 1.44 0 012.88 0z">
                                     </path>
                                 </svg> @romaransubli</a></li>
+                        <li><span class="footer-contact-link"><i data-lucide="map-pin"></i> La Victoria, Estado Aragua, Venezuela</span></li>
                     </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 ROMARAN SUBLII. Todos los derechos reservados.</p>
+                <p>&copy; 2026 ROMARAN SUBLI. Todos los derechos reservados.</p>
+                <p class="dev-credit">Hecho por <a href="https://manueluribe.dev" target="_blank">Manuel Uribe</a></p>
             </div>
         </div>
     </footer>
 
+    <!-- Cart Drawer -->
+    <div id="cart-overlay" class="cart-overlay"></div>
+    <div id="cart-drawer" class="cart-drawer">
+        <div class="cart-header">
+            <h3>Tu Pedido</h3>
+            <div class="cart-header-actions">
+                <button id="clear-cart" class="clear-cart-btn" title="Vaciar Carrito">
+                    <i data-lucide="trash-2"></i>
+                </button>
+                <button id="close-cart" aria-label="Cerrar carrito"><i data-lucide="x"></i></button>
+            </div>
+        </div>
+        <div id="cart-items" class="cart-items">
+            <!-- Items added dynamically -->
+            <div class="empty-cart-msg">Tu carrito está vacío</div>
+        </div>
+        <div class="cart-footer">
+            <p class="cart-note"><i data-lucide="info"></i> Podrás adjuntar tus archivos (PDF, Imágenes) directamente en el chat de WhatsApp.</p>
+            <button id="whatsapp-order-btn" class="cta-btn whatsapp-btn" disabled>
+                <i data-lucide="message-circle"></i> Enviar Pedido por WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating Cart -->
+    <button id="cart-btn" class="float-cart" aria-label="Ver carrito">
+        <i data-lucide="shopping-cart"></i>
+        <span id="cart-count">0</span>
+    </button>
+
     <!-- Floating WhatsApp -->
-    <a href="https://wa.me/584126902476?text=Hola!%20Vengo%20de%20la%20web%20y%20quiero%20cotizar" class="float-wa"
+    <a href="https://wa.me/584124756191?text=Hola!%20Vengo%20de%20la%20web%20y%20quiero%20cotizar" class="float-wa"
         target="_blank" aria-label="Contactar por WhatsApp">
         <svg viewBox="0 0 24 24" width="35" height="35" fill="white">
             <path
@@ -432,6 +507,9 @@
             </path>
         </svg>
     </a>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
 
     <script src="main.js"></script>
     <script>
