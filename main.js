@@ -149,13 +149,13 @@ const iconMap = {
 
 const addToCart = (name, quantity = 1, icon = 'package', options = {}) => {
     const qty = parseInt(quantity);
-    
+
     // Create a unique key based on name and options (like size)
     const optionsKey = Object.values(options).join('-');
     const itemKey = optionsKey ? `${name}-${optionsKey}` : name;
 
     const existingItem = cart.find(item => item.key === itemKey);
-    
+
     // Use mapped icon if provided icon is default
     const finalIcon = (icon === 'package' && iconMap[name]) ? iconMap[name] : icon;
 
@@ -166,7 +166,7 @@ const addToCart = (name, quantity = 1, icon = 'package', options = {}) => {
     }
     saveCart();
     updateCartCount();
-    
+
     const optionText = options.size ? ` (Talla ${options.size})` : "";
     showToast(`¡Añadido ${qty}x ${name}${optionText}!`);
 };
@@ -182,7 +182,7 @@ const showToast = (message) => {
         <i data-lucide="check-circle" style="color: #25D366"></i>
         <span>${message}</span>
     `;
-    
+
     container.appendChild(toast);
     lucide.createIcons();
 
@@ -242,7 +242,7 @@ const renderCart = () => {
     cartItemsContainer.innerHTML = cart.map(item => {
         const icon = item.icon && item.icon !== 'package' ? item.icon : (iconMap[item.name] || 'package');
         const sizeText = item.options && item.options.size ? `<span class="cart-item-option">Talla: ${item.options.size}</span>` : "";
-        
+
         return `
             <div class="cart-item">
                 <div class="item-info">
@@ -272,7 +272,7 @@ const renderCart = () => {
 // Send Order to WhatsApp
 if (whatsappOrderBtn) {
     whatsappOrderBtn.addEventListener('click', () => {
-        const phoneNumber = "584124756191";
+        const phoneNumber = "584126902476";
         let message = "¡Hola Romaran Subli! 👋\n\nMe gustaría realizar un pedido con los siguientes productos:\n\n";
 
         cart.forEach(item => {
@@ -322,7 +322,7 @@ document.querySelectorAll('.add-to-cart').forEach(btn => {
         const iconName = btn.getAttribute('data-icon');
         const input = document.getElementById(inputId);
         const quantity = input ? input.value : 1;
-        
+
         const options = {};
         // Check if there are size options for this product
         const productCard = btn.closest('.product-card');
@@ -332,9 +332,9 @@ document.querySelectorAll('.add-to-cart').forEach(btn => {
                 options.size = activeSize.getAttribute('data-size');
             }
         }
-        
+
         addToCart(productName, quantity, iconName, options);
-        
+
         // Reset input to 1 after adding
         if (input) input.value = 1;
     });
