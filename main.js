@@ -1,27 +1,36 @@
-// Scroll Reveal Animation
-const reveal = () => {
+// Scroll Reveal Animation (Optimized via IntersectionObserver)
+const initReveal = () => {
     const reveals = document.querySelectorAll('.reveal');
-    for (let i = 0; i < reveals.length; i++) {
-        const windowHeight = window.innerHeight;
-        const elementTop = reveals[i].getBoundingClientRect().top;
-        const elementVisible = 100;
-        if (elementTop < windowHeight - elementVisible) {
-            reveals[i].classList.add('active');
-        }
-    }
-}
+    
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.15
+    };
+    
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+                observer.unobserve(entry.target); // Stop observing once revealed
+            }
+        });
+    }, observerOptions);
 
-window.addEventListener('scroll', reveal);
+    reveals.forEach(el => observer.observe(el));
+};
 
-// Navbar scroll effect
+// Navbar scroll effect (Optimized)
 const header = document.querySelector('.glass-nav');
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-        header.classList.add('scrolled');
-    } else {
-        header.classList.remove('scrolled');
-    }
-});
+if (header) {
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    }, { passive: true });
+}
 
 // Smooth scroll for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -222,9 +231,18 @@ const saveCart = () => {
 
 // Update Badge Count
 const updateCartCount = () => {
+    const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+    
     if (cartCountBadge) {
-        const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
         cartCountBadge.textContent = totalItems;
+    }
+
+    if (cartBtn) {
+        if (totalItems > 0) {
+            cartBtn.classList.add('visible');
+        } else {
+            cartBtn.classList.remove('visible');
+        }
     }
 };
 
@@ -342,7 +360,7 @@ document.querySelectorAll('.add-to-cart').forEach(btn => {
 
 // Initial load
 window.addEventListener('load', () => {
-    reveal();
+    initReveal();
     initSlider();
     updateCartCount();
 });

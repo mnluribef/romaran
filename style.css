@@ -799,7 +799,8 @@ a.footer-contact-link:hover {
 .reveal {
     opacity: 0;
     transform: translateY(30px);
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity, transform;
 }
 
 .reveal.active {
@@ -830,6 +831,17 @@ a.footer-contact-link:hover {
     z-index: 1000;
     cursor: pointer;
     transition: var(--transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.8);
+    pointer-events: none;
+}
+
+.float-cart.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+    pointer-events: auto;
 }
 
 .float-cart:hover {
@@ -1285,12 +1297,36 @@ a.footer-contact-link:hover {
         flex-direction: column;
         padding: 2rem;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        gap: 1.5rem;
+        align-items: center;
+        gap: 0.5rem;
     }
     
     .nav-links.active {
         display: flex;
+    }
+
+    .nav-links li {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .nav-links a {
+        color: var(--text-dark);
+        justify-content: flex-start;
+        padding: 0.8rem 1rem;
+        width: 250px;
+        gap: 1.2rem;
+        font-size: 1rem;
+    }
+
+    .nav-links a:hover {
+        color: var(--accent);
+        transform: scale(1.05);
+    }
+
+    .nav-links a i {
+        color: var(--accent);
     }
     
     .hero-content h1 {
