@@ -250,13 +250,18 @@ const updateCartCount = () => {
 const renderCart = () => {
     if (!cartItemsContainer) return;
 
+    const customerForm = document.getElementById('cart-customer-form');
+
     if (cart.length === 0) {
         cartItemsContainer.innerHTML = '<div class="empty-cart-msg">Tu carrito está vacío</div>';
         if (whatsappOrderBtn) whatsappOrderBtn.disabled = true;
+        if (customerForm) customerForm.style.display = 'none';
         return;
     }
 
     if (whatsappOrderBtn) whatsappOrderBtn.disabled = false;
+    if (customerForm) customerForm.style.display = 'block';
+
     cartItemsContainer.innerHTML = cart.map(item => {
         const icon = item.icon && item.icon !== 'package' ? item.icon : (iconMap[item.name] || 'package');
         const sizeText = item.options && item.options.size ? `<span class="cart-item-option">Talla: ${item.options.size}</span>` : "";
@@ -287,81 +292,235 @@ const renderCart = () => {
     lucide.createIcons();
 };
 
-// Send Order to WhatsApp
+// Send Order to Backend and redirect to WhatsApp
 if (whatsappOrderBtn) {
-    whatsappOrderBtn.addEventListener('click', () => {
-        const phoneNumber = "584126902476";
-        let message = "¡Hola Romaran Subli! 👋\n\nMe gustaría realizar un pedido con los siguientes productos:\n\n";
+    whatsappOrderBtn.addEventListener('click', async () => {
+        const clientNameInput = document.getElementById('client-name');
+        const clientPhoneInput = document.getElementById('client-phone');
+        
+        const clientName = clientNameInput ? clientNameInput.value.trim() : "";
+        const clientPhone = clientPhoneInput ? clientPhoneInput.value.trim() : "";
 
-        cart.forEach(item => {
-            const size = item.options && item.options.size ? ` [Talla: ${item.options.size}]` : "";
-            message += `✅ ${item.qty}x ${item.name}${size}\n`;
-        });
+        if (!clientName || !clientPhone) {
+            showToast('⚠️ Ingresa tu nombre y teléfono.');
+            if (!clientName && clientNameInput) clientNameInput.focus();
+            else if (!clientPhone && clientPhoneInput) clientPhoneInput.focus();
+            return;
+        }
 
-        const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-        message += `\n*Total de artículos:* ${totalItems}\n\n📎 *Adjunto a continuación los archivos (PDF/Imágenes) para mi diseño.*`;
+        // Deshabilitar botón durante proceso
+        whatsappOrderBtn.disabled = true;
+        whatsappOrderBtn.innerHTML = '<i data-lucide="loader" class="spin"></i> Registrando Pedido...';
+        lucide.createIcons();
 
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
+        try {
+            // Guardar el pedido en el Backend (D1)
+            const response = await fetch('/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    clientName,
+                    clientPhone,
+                    items: cart
+                })
+            });
+
+            if (!response.ok) throw new Error('Error al registrar pedido en servidor.');
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                const orderId = result.orderId;
+                const phoneNumber = "584126902476";
+                let message = `¡Hola Romaran Subli! 👋\n\nHe realizado un pedido en la web.\n*Número de Pedido:* #${orderId}\n*Cliente:* ${clientName} (${clientPhone})\n\n*Productos del pedido:*\n`;
+
+                cart.forEach(item => {
+                    const size = item.options && item.options.size ? ` [Talla: ${item.options.size}]` : "";
+                    message += `✅ ${item.qty}x ${item.name}${size}\n`;
+                });
+
+                const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+                message += `\n*Total de artículos:* ${totalItems}\n\n📎 *Adjunto a continuación los archivos (PDF/Imágenes) para mi diseño.*`;
+
+                // Vaciar carrito local
+                cart = [];
+                saveCart();
+                updateCartCount();
+                renderCart();
+                
+                // Limpiar campos de texto
+                if (clientNameInput) clientNameInput.value = "";
+                if (clientPhoneInput) clientPhoneInput.value = "";
+
+                // Cerrar drawer
+                toggleCart();
+
+                // Mostrar éxito al usuario
+                showToast(`🎉 ¡Pedido #${orderId} registrado con éxito!`);
+
+                // Redirigir a WhatsApp
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+            } else {
+                throw new Error(result.error || 'Error desconocido del servidor.');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('❌ Error de conexión al registrar pedido. Intenta de nuevo.');
+        } finally {
+            whatsappOrderBtn.disabled = false;
+            whatsappOrderBtn.innerHTML = '<i data-lucide="message-circle"></i> Enviar Pedido por WhatsApp';
+            lucide.createIcons();
+        }
     });
 }
 
-// Event Listeners for Sizes
-document.querySelectorAll('.size-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const parent = btn.parentElement;
-        parent.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-    });
-});
+// Render dynamic products cards
+const renderProducts = (products) => {
+    const container = document.getElementById('catalog-container');
+    if (!container) return;
 
-// Event Listeners for Landing Page Qty Selectors
-document.querySelectorAll('.qty-btn-main').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const id = btn.getAttribute('data-id');
-        const input = document.getElementById(`qty-${id}`);
-        if (!input) return;
+    if (products.length === 0) {
+        container.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 3rem 0; color: var(--text-secondary);">
+                <p>No hay productos activos en el catálogo actualmente.</p>
+            </div>
+        `;
+        return;
+    }
 
-        let val = parseInt(input.value);
-        if (btn.classList.contains('plus')) {
-            val++;
-        } else if (btn.classList.contains('minus') && val > 1) {
-            val--;
+    container.innerHTML = products.map(p => {
+        const sizesHtml = p.sizes ? `
+            <div class="product-options">
+                <span>Talla:</span>
+                <div class="size-selector" data-product="${p.id}">
+                    ${p.sizes.split(',').map((size, idx) => `
+                        <button class="size-btn ${idx === 0 ? 'active' : ''}" data-size="${size}">${size}</button>
+                    `).join('')}
+                </div>
+            </div>
+        ` : '';
+
+        return `
+            <div class="product-card reveal">
+                <div class="product-img">
+                    <img src="${p.image_url}" alt="${p.name}" loading="lazy">
+                </div>
+                <div class="product-info">
+                    <div class="product-header">
+                        <h3>${p.name}</h3>
+                        <i data-lucide="${p.icon || 'package'}"></i>
+                    </div>
+                    <p class="product-desc">${p.description || ''}</p>
+                    ${sizesHtml}
+                    <div class="product-actions">
+                        <div class="main-qty-selector">
+                            <button class="qty-btn-main minus" data-id="${p.id}">-</button>
+                            <input type="number" value="1" min="1" id="qty-${p.id}" class="qty-input">
+                            <button class="qty-btn-main plus" data-id="${p.id}">+</button>
+                        </div>
+                        <button class="cta-btn product-cta add-to-cart" 
+                            data-name="${p.name}" 
+                            data-input="qty-${p.id}" 
+                            data-icon="${p.icon || 'package'}">Agregar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    lucide.createIcons();
+    initReveal(); // Reiniciar animaciones de entrada
+};
+
+// Fetch catalog from API
+const fetchCatalog = async () => {
+    try {
+        const response = await fetch('/api/products');
+        if (!response.ok) throw new Error('Error al cargar catálogo');
+        const products = await response.json();
+        renderProducts(products);
+    } catch (err) {
+        console.error(err);
+        const container = document.getElementById('catalog-container');
+        if (container) {
+            container.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 3rem 0; color: #ff007f;">
+                    <i data-lucide="alert-circle" style="margin-bottom: 1rem; width: 32px; height: 32px;"></i>
+                    <p>Error al cargar el catálogo de productos. Por favor recarga la página.</p>
+                </div>
+            `;
+            lucide.createIcons();
         }
-        input.value = val;
-    });
-});
+    }
+};
 
-// Event Listeners for "Add to Cart" buttons
-document.querySelectorAll('.add-to-cart').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const productName = btn.getAttribute('data-name');
-        const inputId = btn.getAttribute('data-input');
-        const iconName = btn.getAttribute('data-icon');
-        const input = document.getElementById(inputId);
-        const quantity = input ? input.value : 1;
+// Event delegation for dynamic catalog items
+const initCatalogDelegation = () => {
+    const container = document.getElementById('catalog-container');
+    if (!container) return;
 
-        const options = {};
-        // Check if there are size options for this product
-        const productCard = btn.closest('.product-card');
-        if (productCard) {
-            const activeSize = productCard.querySelector('.size-btn.active');
-            if (activeSize) {
-                options.size = activeSize.getAttribute('data-size');
+    container.addEventListener('click', (e) => {
+        // 1. Click en selector de Talla
+        const sizeBtn = e.target.closest('.size-btn');
+        if (sizeBtn) {
+            const selector = sizeBtn.parentElement;
+            selector.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+            sizeBtn.classList.add('active');
+            return;
+        }
+
+        // 2. Click en botones de cantidad del catálogo (+/-)
+        const qtyBtn = e.target.closest('.qty-btn-main');
+        if (qtyBtn) {
+            const id = qtyBtn.getAttribute('data-id');
+            const input = document.getElementById(`qty-${id}`);
+            if (input) {
+                let val = parseInt(input.value) || 1;
+                if (qtyBtn.classList.contains('plus')) {
+                    val++;
+                } else if (qtyBtn.classList.contains('minus') && val > 1) {
+                    val--;
+                }
+                input.value = val;
             }
+            return;
         }
 
-        addToCart(productName, quantity, iconName, options);
+        // 3. Click en Agregar al Carrito
+        const addBtn = e.target.closest('.add-to-cart');
+        if (addBtn) {
+            const productName = addBtn.getAttribute('data-name');
+            const inputId = addBtn.getAttribute('data-input');
+            const iconName = addBtn.getAttribute('data-icon');
+            const input = document.getElementById(inputId);
+            const quantity = input ? parseInt(input.value) || 1 : 1;
 
-        // Reset input to 1 after adding
-        if (input) input.value = 1;
+            const options = {};
+            const productCard = addBtn.closest('.product-card');
+            if (productCard) {
+                const activeSize = productCard.querySelector('.size-btn.active');
+                if (activeSize) {
+                    options.size = activeSize.getAttribute('data-size');
+                }
+            }
+
+            addToCart(productName, quantity, iconName, options);
+
+            // Resetear cantidad a 1
+            if (input) input.value = 1;
+        }
     });
-});
+};
 
 // Initial load
 window.addEventListener('load', () => {
     initReveal();
     initSlider();
+    fetchCatalog();
+    initCatalogDelegation();
     updateCartCount();
 });
 

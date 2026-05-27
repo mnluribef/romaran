@@ -141,161 +141,12 @@
                 <h2>Nuestro Catálogo</h2>
                 <p>Personalizamos una amplia variedad de productos. Tú pones la idea, nosotros el color.</p>
             </div>
-            <div class="product-grid">
-
-                <!-- Franelas -->
-                <div class="product-card reveal">
-                    <div class="product-img">
-                        <img src="assets/product_franela.png" alt="Franelas Personalizadas" loading="lazy">
-                    </div>
-                    <div class="product-info">
-                        <div class="product-header">
-                            <h3>Franelas</h3>
-                            <i data-lucide="shirt"></i>
-                        </div>
-                        <p class="product-desc">Franelas de alta calidad con estampados full color que resisten el paso
-                            del tiempo.</p>
-
-                        <div class="product-options">
-                            <span>Talla:</span>
-                            <div class="size-selector" data-product="franela">
-                                <button class="size-btn active" data-size="S">S</button>
-                                <button class="size-btn" data-size="M">M</button>
-                                <button class="size-btn" data-size="L">L</button>
-                                <button class="size-btn" data-size="XL">XL</button>
-                            </div>
-                        </div>
-                        <div class="product-actions">
-                            <div class="main-qty-selector">
-                                <button class="qty-btn-main minus" data-id="franela">-</button>
-                                <input type="number" value="1" min="1" id="qty-franela" class="qty-input">
-                                <button class="qty-btn-main plus" data-id="franela">+</button>
-                            </div>
-                            <button class="cta-btn product-cta add-to-cart" data-name="Franela Personalizada"
-                                data-input="qty-franela" data-icon="shirt">Agregar</button>
-                        </div>
-                    </div>
+            <div class="product-grid" id="catalog-container">
+                <!-- Se cargará dinámicamente con JavaScript -->
+                <div class="loading-catalog" style="grid-column: 1/-1; text-align: center; padding: 3rem 0; color: var(--text-secondary);">
+                    <i data-lucide="loader" class="spin" style="margin-bottom: 1rem; width: 32px; height: 32px;"></i>
+                    <p>Cargando catálogo premium...</p>
                 </div>
-
-                <!-- Tazas -->
-                <div class="product-card reveal">
-                    <div class="product-img">
-                        <img src="assets/product_taza.png" alt="Tazas Sublimadas" loading="lazy">
-                    </div>
-                    <div class="product-info">
-                        <div class="product-header">
-                            <h3>Tazas</h3>
-                            <i data-lucide="coffee"></i>
-                        </div>
-                        <p class="product-desc">Tazas de cerámica premium, perfectas para regalos o
-                            detalles especiales.</p>
-                        <div class="product-actions">
-                            <div class="main-qty-selector">
-                                <button class="qty-btn-main minus" data-id="taza">-</button>
-                                <input type="number" value="1" min="1" id="qty-taza" class="qty-input">
-                                <button class="qty-btn-main plus" data-id="taza">+</button>
-                            </div>
-                            <button class="cta-btn product-cta add-to-cart" data-name="Taza Sublimada"
-                                data-input="qty-taza" data-icon="coffee">Agregar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Gorras -->
-                <div class="product-card reveal">
-                    <div class="product-img">
-                        <img src="assets/product_gorras.png" alt="Gorras Personalizadas" loading="lazy">
-                    </div>
-                    <div class="product-info">
-                        <div class="product-header">
-                            <h3>Gorras</h3>
-                            <i data-lucide="crown"></i>
-                        </div>
-                        <p class="product-desc">Gorras con diseños únicos usando vinil textil o sublimación de la mejor
-                            calidad.</p>
-                        <div class="product-actions">
-                            <div class="main-qty-selector">
-                                <button class="qty-btn-main minus" data-id="gorra">-</button>
-                                <input type="number" value="1" min="1" id="qty-gorra" class="qty-input">
-                                <button class="qty-btn-main plus" data-id="gorra">+</button>
-                            </div>
-                            <button class="cta-btn product-cta add-to-cart" data-name="Gorra Personalizada"
-                                data-input="qty-gorra" data-icon="crown">Agregar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Vinil Textil -->
-                <div class="product-card reveal">
-                    <div class="product-img">
-                        <img src="assets/product_vinil.png" alt="Vinil Textil" loading="lazy">
-                    </div>
-                    <div class="product-info">
-                        <div class="product-header">
-                            <h3>Vinil Textil</h3>
-                            <i data-lucide="scissors"></i>
-                        </div>
-                        <p class="product-desc">Cortes precisos y aplicaciones duraderas para uniformes y moda urbana.
-                        </p>
-                        <div class="product-actions">
-                            <div class="main-qty-selector">
-                                <button class="qty-btn-main minus" data-id="vinil">-</button>
-                                <input type="number" value="1" min="1" id="qty-vinil" class="qty-input">
-                                <button class="qty-btn-main plus" data-id="vinil">+</button>
-                            </div>
-                            <button class="cta-btn product-cta add-to-cart" data-name="Vinil Textil"
-                                data-input="qty-vinil" data-icon="scissors">Agregar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pop Sockets -->
-                <div class="product-card reveal">
-                    <div class="product-img">
-                        <img src="assets/product_popsockets.png" alt="Pop Sockets" loading="lazy">
-                    </div>
-                    <div class="product-info">
-                        <div class="product-header">
-                            <h3>Pop Sockets</h3>
-                            <i data-lucide="circle-dot"></i>
-                        </div>
-                        <p class="product-desc">Agarres para celulares con el logo de tu marca a todo color.</p>
-                        <div class="product-actions">
-                            <div class="main-qty-selector">
-                                <button class="qty-btn-main minus" data-id="pop">-</button>
-                                <input type="number" value="1" min="1" id="qty-pop" class="qty-input">
-                                <button class="qty-btn-main plus" data-id="pop">+</button>
-                            </div>
-                            <button class="cta-btn product-cta add-to-cart" data-name="Pop Socket" data-input="qty-pop"
-                                data-icon="circle-dot">Agregar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Llaveros & Lanyards -->
-                <div class="product-card reveal">
-                    <div class="product-img">
-                        <img src="assets/product_lanyards.png" alt="Llaveros & Lanyards" loading="lazy">
-                    </div>
-                    <div class="product-info">
-                        <div class="product-header">
-                            <h3>Llaveros & Lanyards</h3>
-                            <i data-lucide="link"></i>
-                        </div>
-                        <p class="product-desc">Identificadores, cintas y llaveros ideales para eventos y merchandising.
-                        </p>
-                        <div class="product-actions">
-                            <div class="main-qty-selector">
-                                <button class="qty-btn-main minus" data-id="lanyard">-</button>
-                                <input type="number" value="1" min="1" id="qty-lanyard" class="qty-input">
-                                <button class="qty-btn-main plus" data-id="lanyard">+</button>
-                            </div>
-                            <button class="cta-btn product-cta add-to-cart" data-name="Llavero / Lanyard"
-                                data-input="qty-lanyard" data-icon="link">Agregar</button>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
     </section>
@@ -545,6 +396,20 @@
         <div id="cart-items" class="cart-items">
             <!-- Items added dynamically -->
             <div class="empty-cart-msg">Tu carrito está vacío</div>
+        </div>
+        <div class="cart-customer-form" id="cart-customer-form" style="padding: 1.2rem 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.08); display: none; background: rgba(255, 255, 255, 0.02);">
+            <h4 style="margin-bottom: 0.75rem; color: #fff; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="user" style="width: 16px; height: 16px; color: #ff007f;"></i>
+                Datos de Contacto
+            </h4>
+            <div style="margin-bottom: 0.75rem;">
+                <label for="client-name" style="display: block; font-size: 0.75rem; margin-bottom: 0.3rem; color: #a1a1aa; font-weight: 500;">Nombre Completo</label>
+                <input type="text" id="client-name" placeholder="Ej. Juan Pérez" style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; background: rgba(255, 255, 255, 0.03); color: #fff; outline: none; font-size: 0.9rem; transition: border-color 0.2s;">
+            </div>
+            <div>
+                <label for="client-phone" style="display: block; font-size: 0.75rem; margin-bottom: 0.3rem; color: #a1a1aa; font-weight: 500;">Teléfono / WhatsApp</label>
+                <input type="tel" id="client-phone" placeholder="Ej. +58 412-6902476" style="width: 100%; padding: 0.6rem 0.8rem; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; background: rgba(255, 255, 255, 0.03); color: #fff; outline: none; font-size: 0.9rem; transition: border-color 0.2s;">
+            </div>
         </div>
         <div class="cart-footer">
             <p class="cart-note"><i data-lucide="info"></i> Podrás adjuntar tus archivos (PDF, Imágenes) directamente en
