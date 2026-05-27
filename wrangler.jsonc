@@ -13,7 +13,7 @@
   ],
   "d1_databases": [
     {
-      "binding": "DB",
+      "binding": "sublimado",
       "database_name": "sublimado",
       "database_id": "aa9c831b-c7c3-4b00-8650-f5fd6d67458c"
     }
