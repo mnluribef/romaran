@@ -333,7 +333,7 @@ if (whatsappOrderBtn) {
             
             if (result.success) {
                 const orderId = result.orderId;
-                const phoneNumber = "584126902476";
+                const phoneNumber = "584124756191";
                 let message = `¡Hola Romaran Subli! 👋\n\nHe realizado un pedido en la web.\n*Número de Pedido:* #${orderId}\n*Cliente:* ${clientName} (${clientPhone})\n\n*Productos del pedido:*\n`;
 
                 cart.forEach(item => {
