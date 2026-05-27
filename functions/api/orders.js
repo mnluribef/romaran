@@ -21,7 +21,7 @@ export async function onRequestGet(context) {
     if (!user) return unauthorizedResponse();
 
     const { env, request } = context;
-    const db = env.DB;
+    const db = env.DB || env.sublimado;
     
     const url = new URL(request.url);
     const orderId = url.searchParams.get("id");
@@ -67,7 +67,7 @@ export async function onRequestGet(context) {
  */
 export async function onRequestPost(context) {
     const { env, request } = context;
-    const db = env.DB;
+    const db = env.DB || env.sublimado;
 
     try {
         const data = await request.json();
@@ -186,7 +186,7 @@ export async function onRequestPut(context) {
     if (!user) return unauthorizedResponse();
 
     const { env, request } = context;
-    const db = env.DB;
+    const db = env.DB || env.sublimado;
 
     try {
         const { id, status, paymentMethod } = await request.json();
@@ -255,7 +255,7 @@ export async function onRequestDelete(context) {
     if (!user) return unauthorizedResponse();
 
     const { env, request } = context;
-    const db = env.DB;
+    const db = env.DB || env.sublimado;
 
     try {
         const url = new URL(request.url);

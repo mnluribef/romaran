@@ -32,7 +32,7 @@ function getTokenFromRequest(request) {
  */
 export async function verifySession(context) {
     const { request, env } = context;
-    const db = env.DB;
+    const db = env.DB || env.sublimado;
 
     const token = getTokenFromRequest(request);
     if (!token) return null;

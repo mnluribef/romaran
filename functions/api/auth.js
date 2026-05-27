@@ -23,7 +23,7 @@ export async function onRequestGet(context) {
  */
 export async function onRequestPost(context) {
     const { request, env } = context;
-    const db = env.DB;
+    const db = env.DB || env.sublimado;
 
     try {
         const { username, passwordHash } = await request.json();
@@ -79,7 +79,7 @@ export async function onRequestPost(context) {
  */
 export async function onRequestDelete(context) {
     const { request, env } = context;
-    const db = env.DB;
+    const db = env.DB || env.sublimado;
 
     // Obtener el token de la cookie
     const cookieHeader = request.headers.get("Cookie");
