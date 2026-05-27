@@ -1,8 +1,8 @@
-// Controlador de Pedidos y Ventas - ROMARAN SUBLI
+// Controlador de Pedidos y Ventas - SUBLICOLOR
 import { verifySession, unauthorizedResponse } from "./_auth.js";
 
 /**
- * Genera un ID de pedido único y corto (ej: ROM-X9F4E)
+ * Genera un ID de pedido único y corto (ej: SUB-X9F4E)
  */
 function generateOrderId() {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -10,7 +10,7 @@ function generateOrderId() {
     for (let i = 0; i < 5; i++) {
         code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    return `ROM-${code}`;
+    return `SUB-${code}`;
 }
 
 /**

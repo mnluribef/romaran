@@ -1,4 +1,4 @@
-// Controlador de Catálogo de Productos - ROMARAN SUBLI
+// Controlador de Catálogo de Productos - SUBLICOLOR
 import { verifySession, unauthorizedResponse } from "./_auth.js";
 
 /**
@@ -30,10 +30,14 @@ export async function onRequestGet(context) {
             products = results;
         }
 
+        const cacheControl = isAdminMode 
+            ? "no-store, no-cache, must-revalidate" 
+            : "public, max-age=5"; // Cache corto de 5s para catálogo público
+
         return new Response(JSON.stringify(products), {
             headers: { 
                 "Content-Type": "application/json",
-                "Cache-Control": "public, max-age=60" // Cachear brevemente para optimizar
+                "Cache-Control": cacheControl
             }
         });
     } catch (err) {

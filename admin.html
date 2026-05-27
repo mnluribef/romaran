@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROMARAN SUBLI | Panel Administrativo VIP</title>
+    <title>SUBLICOLOR | Panel Administrativo VIP</title>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -730,7 +730,7 @@
         <div class="login-card">
             <div class="login-logo">
                 <i data-lucide="printer"></i>
-                ROMARAN<span>SUBLI</span>
+                SUBLI<span>COLOR</span>
             </div>
             <div class="login-subtitle">Panel de Control & Ventas</div>
             
@@ -760,7 +760,7 @@
             <div class="sidebar-header">
                 <div class="login-logo" style="margin-bottom: 0; justify-content: flex-start; font-size: 1.4rem;">
                     <i data-lucide="printer" style="color: var(--primary);"></i>
-                    <span class="logo-text">ROMARAN<span style="color: var(--accent);">VIP</span></span>
+                    <span class="logo-text">SUBLI<span style="color: var(--accent);">COLOR</span></span>
                 </div>
             </div>
             
@@ -775,6 +775,12 @@
                     <div class="sidebar-link" data-target="section-orders">
                         <i data-lucide="shopping-bag"></i>
                         <span>Gestión Pedidos</span>
+                    </div>
+                </li>
+                <li>
+                    <div class="sidebar-link" data-target="section-sales">
+                        <i data-lucide="trending-up"></i>
+                        <span>Registro Ventas</span>
                     </div>
                 </li>
                 <li>
@@ -890,7 +896,7 @@
                 
                 <div class="content-card">
                     <div class="card-header">
-                        <h2>Todos los Pedidos Recibidos</h2>
+                        <h2>Todos los Pedidos Recibidos <span id="orders-total-summary" style="font-size: 0.95rem; color: var(--accent); margin-left: 1rem; font-weight: 500;"></span></h2>
                         <div class="card-actions">
                             <button class="btn-action secondary" id="btn-refresh-orders"><i data-lucide="refresh-cw"></i> Actualizar</button>
                         </div>
@@ -911,6 +917,40 @@
                             <tbody id="table-all-orders">
                                 <tr>
                                     <td colspan="7" style="text-align: center; color: var(--text-secondary);">No hay pedidos registrados en el sistema.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= SECCIÓN 2.5: REGISTRO DE VENTAS ================= -->
+            <div id="section-sales" class="dashboard-section">
+                
+                <div class="content-card">
+                    <div class="card-header">
+                        <h2>Registro Histórico de Ventas <span id="sales-total-amount" style="font-size: 0.95rem; color: var(--success); margin-left: 1rem; font-weight: 500;"></span></h2>
+                        <div class="card-actions">
+                            <button class="btn-action secondary" id="btn-refresh-sales"><i data-lucide="refresh-cw"></i> Sincronizar</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID Venta</th>
+                                    <th>ID Pedido</th>
+                                    <th>Cliente</th>
+                                    <th>Teléfono</th>
+                                    <th>Monto</th>
+                                    <th>Método de Pago</th>
+                                    <th>Fecha de Pago</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-all-sales">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; color: var(--text-secondary);">Cargando registro de ventas...</td>
                                 </tr>
                             </tbody>
                         </table>

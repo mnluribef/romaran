@@ -1,4 +1,4 @@
-// Auxiliar de Autenticación para API de ROMARAN SUBLI
+// Auxiliar de Autenticación para API de SUBLICOLOR
 
 /**
  * Obtiene el token de la sesión desde las Cookies o el encabezado Authorization
@@ -19,7 +19,7 @@ function getTokenFromRequest(request) {
             acc[key] = value;
             return acc;
         }, {});
-        return cookies["romaran_session"];
+        return cookies["sublicolor_session"];
     }
 
     return null;

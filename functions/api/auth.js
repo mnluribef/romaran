@@ -1,4 +1,4 @@
-// Controlador de Autenticación - ROMARAN SUBLI
+// Controlador de Autenticación - SUBLICOLOR
 import { verifySession } from "./_auth.js";
 
 /**
@@ -58,7 +58,7 @@ export async function onRequestPost(context) {
             .run();
 
         // Responder estableciendo la cookie segura HTTP-only y retornando éxito
-        const cookie = `romaran_session=${sessionToken}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Strict`;
+        const cookie = `sublicolor_session=${sessionToken}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Strict`;
         
         return new Response(JSON.stringify({ success: true, username: user.username }), {
             headers: {
@@ -90,7 +90,7 @@ export async function onRequestDelete(context) {
             acc[key] = value;
             return acc;
         }, {});
-        token = cookies["romaran_session"];
+        token = cookies["sublicolor_session"];
     }
 
     if (token) {
@@ -103,7 +103,7 @@ export async function onRequestDelete(context) {
     }
 
     // Limpiar la cookie del navegador
-    const clearCookie = `romaran_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict`;
+    const clearCookie = `sublicolor_session=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict`;
 
     return new Response(JSON.stringify({ success: true }), {
         headers: {

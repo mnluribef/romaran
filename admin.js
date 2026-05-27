@@ -1,9 +1,10 @@
-// Lógica del Panel Administrativo VIP - ROMARAN SUBLI
+// Lógica del Panel Administrativo VIP - SUBLICOLOR
 
 // Variables de estado
 let currentAdmin = null;
 let ordersList = [];
 let productsList = [];
+let salesList = [];
 
 // Elementos del DOM
 const loader = document.getElementById('page-loader');
@@ -50,6 +51,10 @@ async function sha256(password) {
  * @param {string} type - 'success', 'error', 'warning', 'info'
  */
 function showToast(message, type = 'success') {
+    if (toastContainer) {
+        toastContainer.innerHTML = '';
+    }
+
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     
@@ -204,6 +209,10 @@ sidebarLinks.forEach(link => {
             dashboardTitle.textContent = 'Gestión de Pedidos';
             dashboardSubtitle.textContent = 'Revisa detalles, controla procesos y cambia el estado de tus solicitudes.';
             loadOrders();
+        } else if (targetSectionId === 'section-sales') {
+            dashboardTitle.textContent = 'Registro de Ventas';
+            dashboardSubtitle.textContent = 'Consulta y analiza el histórico de cobros y pagos recibidos por los pedidos completados.';
+            loadSales();
         } else if (targetSectionId === 'section-inventory') {
             dashboardTitle.textContent = 'Inventario & Catálogo';
             dashboardSubtitle.textContent = 'Crea nuevos productos, actualiza precios, cambia visibilidad o edita información.';
@@ -225,7 +234,8 @@ document.querySelectorAll('.view-all-orders-btn').forEach(btn => {
 async function refreshAllData() {
     await Promise.all([
         loadOrders(),
-        loadProducts()
+        loadProducts(),
+        loadSales()
     ]);
     renderMetrics();
 }
@@ -254,6 +264,62 @@ async function loadProducts() {
         console.error(err);
         showToast('Error al cargar productos del servidor.', 'error');
     }
+}
+
+// 2.5 Cargar Registro de Ventas de la API
+async function loadSales() {
+    try {
+        const res = await fetch('/api/sales');
+        if (!res.ok) throw new Error('No autorizado');
+        salesList = await res.json();
+        renderSales();
+    } catch (err) {
+        console.error(err);
+        showToast('Error al cargar ventas del servidor.', 'error');
+    }
+}
+
+function renderSales() {
+    const tableSales = document.getElementById('table-all-sales');
+    const salesTotalSpan = document.getElementById('sales-total-amount');
+
+    // Calcular monto total
+    const totalAmount = salesList.reduce((sum, s) => sum + (s.monto || 0), 0);
+    if (salesTotalSpan) {
+        salesTotalSpan.textContent = `(Total Facturado: $${totalAmount.toFixed(2)})`;
+    }
+
+    if (!tableSales) return;
+
+    if (salesList.length === 0) {
+        tableSales.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-secondary);">No se han registrado ventas completadas todavía.</td></tr>`;
+        return;
+    }
+
+    tableSales.innerHTML = salesList.map(s => {
+        const dateObj = new Date(s.fecha);
+        const dateString = dateObj.toLocaleDateString('es-VE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        return `
+            <tr>
+                <td><strong>#V-${s.id}</strong></td>
+                <td><code style="font-weight: 700; color: var(--primary);">${s.order_id}</code></td>
+                <td>${s.client_name}</td>
+                <td>${s.client_phone}</td>
+                <td style="font-weight: 700; color: var(--success);">$${parseFloat(s.monto).toFixed(2)}</td>
+                <td><span style="background: rgba(34, 197, 94, 0.1); color: var(--success); padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">${s.metodo_pago}</span></td>
+                <td style="font-size: 0.85rem; color: var(--text-secondary);">${dateString}</td>
+            </tr>
+        `;
+    }).join('');
+
+    lucide.createIcons();
 }
 
 // --- RENDER DE MÉTRICAS ---
@@ -292,6 +358,16 @@ function renderMetrics() {
 function renderOrders() {
     const tableAll = document.getElementById('table-all-orders');
     const tableRecent = document.getElementById('table-recent-orders');
+
+    // Calcular totalizaciones
+    const totalOrdersSum = ordersList.reduce((sum, o) => sum + (o.total_price || 0), 0);
+    const nonCancelledOrders = ordersList.filter(o => o.status !== 'cancelado');
+    const activeOrdersSum = nonCancelledOrders.reduce((sum, o) => sum + (o.total_price || 0), 0);
+
+    const summarySpan = document.getElementById('orders-total-summary');
+    if (summarySpan) {
+        summarySpan.textContent = `(Monto Total: $${totalOrdersSum.toFixed(2)} | Activos: $${activeOrdersSum.toFixed(2)})`;
+    }
 
     // 1. Render en tabla general
     if (tableAll) {
@@ -367,10 +443,21 @@ function createOrderRowMarkup(order, includeStatusSelector = true) {
 // Actualizar estado de un pedido (Invocado desde onchange en la tabla)
 async function updateOrderStatus(orderId, newStatus) {
     try {
+        let paymentMethod = null;
+        if (newStatus === 'completado') {
+            paymentMethod = prompt("Ingrese el método de pago del cliente (ej: Pago Móvil, Efectivo, Zelle, Transferencia):", "Pago Móvil");
+            if (paymentMethod === null) {
+                // El usuario presionó Cancelar, cancelamos el cambio de estado
+                refreshAllData();
+                return;
+            }
+            paymentMethod = paymentMethod.trim() || "WhatsApp / Por acordar";
+        }
+
         const response = await fetch('/api/orders', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: orderId, status: newStatus })
+            body: JSON.stringify({ id: orderId, status: newStatus, paymentMethod: paymentMethod })
         });
 
         if (!response.ok) throw new Error('Error al actualizar estado');
@@ -461,7 +548,7 @@ async function viewOrderDetails(orderId) {
         if (btnChat) {
             // Limpiar teléfono por seguridad de URL
             const cleanPhone = order.client_phone.replace(/[^\d]/g, '');
-            const message = `Hola ${order.client_name}, te contacto de *Romaran Subli* con respecto a tu pedido *#${order.id}*...`;
+            const message = `Hola ${order.client_name}, te contacto de *SubliColor* con respecto a tu pedido *#${order.id}*...`;
             btnChat.href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
         }
 
@@ -663,6 +750,17 @@ if (btnRefreshProducts) {
         loadProducts().then(() => {
             showToast('Catálogo sincronizado.', 'success');
             btnRefreshProducts.classList.remove('spin');
+        });
+    });
+}
+
+const btnRefreshSales = document.getElementById('btn-refresh-sales');
+if (btnRefreshSales) {
+    btnRefreshSales.addEventListener('click', () => {
+        btnRefreshSales.classList.add('spin');
+        loadSales().then(() => {
+            showToast('Registro de ventas sincronizado.', 'success');
+            btnRefreshSales.classList.remove('spin');
         });
     });
 }

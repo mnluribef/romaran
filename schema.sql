@@ -1,4 +1,4 @@
--- Esquema de Base de Datos - ROMARAN SUBLI
+-- Esquema de Base de Datos - SUBLICOLOR
 
 -- Tabla de Productos
 CREATE TABLE IF NOT EXISTS products (
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS products (
 
 -- Tabla de Pedidos
 CREATE TABLE IF NOT EXISTS orders (
-    id TEXT PRIMARY KEY, -- ID único del pedido (ej: ROM-XXXX)
+    id TEXT PRIMARY KEY, -- ID único del pedido (ej: SUB-XXXX)
     client_name TEXT NOT NULL,
     client_phone TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'pendiente', -- pendiente, en_produccion, listo_entrega, completado, cancelado
@@ -33,6 +33,16 @@ CREATE TABLE IF NOT EXISTS order_items (
     product_name TEXT NOT NULL,
     size TEXT, -- Talla seleccionada (opcional)
     quantity INTEGER NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+);
+
+-- Tabla de Ventas Registradas
+CREATE TABLE IF NOT EXISTS sales (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    order_id TEXT NOT NULL,
+    monto REAL NOT NULL DEFAULT 0.0,
+    metodo_pago TEXT NOT NULL,
+    fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
 

@@ -92,7 +92,7 @@ if (mobileMenuBtn && navLinks) {
 
 // --- Shopping Cart Logic ---
 
-let cart = JSON.parse(localStorage.getItem('romaran_cart')) || [];
+let cart = JSON.parse(localStorage.getItem('sublicolor_cart')) || [];
 
 const cartBtn = document.getElementById('cart-btn');
 const closeCartBtn = document.getElementById('close-cart');
@@ -185,6 +185,9 @@ const showToast = (message) => {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
+    // Limpiar toasts anteriores para no acumular
+    container.innerHTML = '';
+
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerHTML = `
@@ -226,7 +229,7 @@ const updateQty = (key, delta) => {
 
 // Save to LocalStorage
 const saveCart = () => {
-    localStorage.setItem('romaran_cart', JSON.stringify(cart));
+    localStorage.setItem('sublicolor_cart', JSON.stringify(cart));
 };
 
 // Update Badge Count
@@ -334,7 +337,7 @@ if (whatsappOrderBtn) {
             if (result.success) {
                 const orderId = result.orderId;
                 const phoneNumber = "584124756191";
-                let message = `¡Hola Romaran Subli! 👋\n\nHe realizado un pedido en la web.\n*Número de Pedido:* #${orderId}\n*Cliente:* ${clientName} (${clientPhone})\n\n*Productos del pedido:*\n`;
+                let message = `¡Hola SubliColor! 👋\n\nHe realizado un pedido en la web.\n*Número de Pedido:* #${orderId}\n*Cliente:* ${clientName} (${clientPhone})\n\n*Productos del pedido:*\n`;
 
                 cart.forEach(item => {
                     const size = item.options && item.options.size ? ` [Talla: ${item.options.size}]` : "";
@@ -413,7 +416,10 @@ const renderProducts = (products) => {
                         <h3>${p.name}</h3>
                         <i data-lucide="${p.icon || 'package'}"></i>
                     </div>
-                    <p class="product-desc">${p.description || ''}</p>
+                    <div class="product-price" style="font-size: 1.3rem; font-weight: 700; color: var(--accent); margin: 0.5rem 0 0.8rem 0; font-family: 'Outfit', sans-serif;">
+                        ${p.price > 0 ? `$${parseFloat(p.price).toFixed(2)}` : 'A consultar'}
+                    </div>
+                    <p class="product-desc" style="min-height: auto; margin-bottom: 1.2rem;">${p.description || ''}</p>
                     ${sizesHtml}
                     <div class="product-actions">
                         <div class="main-qty-selector">
