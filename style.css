@@ -1469,3 +1469,10 @@ a.footer-contact-link:hover {
     background: #e60000;
     box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3);
 }
+
+/* Input focus premium highlights for cart drawer */
+.cart-customer-form input:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 10px rgba(255, 20, 147, 0.15);
+    background-color: var(--white) !important;
+}

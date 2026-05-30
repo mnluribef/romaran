@@ -232,6 +232,8 @@
             margin-left: 280px;
             flex: 1;
             padding: 2.5rem;
+            min-width: 0; /* Soluciona el bug de desborde de flexbox */
+            overflow-x: hidden; /* Evita desplazamientos horizontales accidentales */
             transition: var(--transition);
         }
 
@@ -444,7 +446,7 @@
 
         /* Dropdowns de Tabla */
         .status-select {
-            background: rgba(15, 22, 42, 0.6);
+            background: rgba(15, 22, 42, 0.9);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
             padding: 0.4rem 0.6rem;
@@ -457,6 +459,15 @@
 
         .status-select:focus {
             border-color: var(--primary);
+            box-shadow: 0 0 8px rgba(0, 194, 255, 0.2);
+        }
+
+        /* Estilo de opciones para forzar fondos oscuros en navegadores y evitar texto invisible */
+        .status-select option,
+        .form-control option,
+        select option {
+            background-color: #0b0f19; /* Fondo oscuro sólido de la aplicación */
+            color: var(--text-primary); /* Texto blanco/gris claro */
         }
 
         /* Botones de acción rápidos en tablas */
@@ -558,6 +569,46 @@
             overflow-y: auto;
             margin-bottom: 2rem;
             padding-right: 0.5rem;
+        }
+
+        /* Barra de scroll personalizada premium para modales */
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: rgba(15, 22, 42, 0.4);
+            border-radius: 10px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(0, 194, 255, 0.3); /* Azul neón translúcido */
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: var(--primary); /* Azul neón brillante */
+        }
+
+        /* Scroll general de la página adaptado al tema oscuro */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 2px solid var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent); /* Rosa neón para hover general */
         }
 
         .modal-footer {
@@ -673,28 +724,62 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
+        /* Overlay del Sidebar para versión móvil/tablet */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 15, 25, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+        
+        .sidebar-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         /* Responsive */
         @media (max-width: 992px) {
             .sidebar {
-                width: 70px;
+                position: fixed;
+                left: -260px; /* Esconde sidebar fuera de pantalla */
+                width: 260px;
+                height: 100vh;
+                z-index: 100;
+                transition: var(--transition);
             }
-            .sidebar-header {
-                padding: 1.5rem 0.5rem;
-                text-align: center;
+            
+            .sidebar.active {
+                left: 0; /* Desplaza sidebar hacia adentro */
+                box-shadow: 0 0 35px rgba(0, 0, 0, 0.6);
             }
+
             .sidebar-header .logo-text {
-                display: none;
+                display: inline !important; /* Mostrar texto del logo al expandir */
             }
+
             .sidebar-link span {
-                display: none;
+                display: inline !important; /* Mostrar texto del menú al expandir */
             }
+
             .sidebar-link {
-                justify-content: center;
-                padding: 0.9rem;
+                justify-content: flex-start !important;
+                padding: 0.9rem 1.2rem !important;
             }
+
             .main-content {
-                margin-left: 70px;
+                margin-left: 0 !important; /* Ocupa toda la pantalla */
                 padding: 1.5rem;
+            }
+            
+            #btn-sidebar-toggle {
+                display: flex !important; /* Muestra el botón de menú */
             }
         }
 
@@ -708,9 +793,48 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 1rem;
+                padding: 1.2rem 1rem !important;
             }
             .order-meta-info {
                 grid-template-columns: 1fr;
+            }
+            
+            /* Optimización de Espacios y Tablas en Móviles */
+            .main-content {
+                padding: 1rem !important;
+            }
+            .content-card {
+                border-radius: 16px;
+                margin-bottom: 1.5rem;
+            }
+            th, td {
+                padding: 0.8rem 0.6rem !important;
+                font-size: 0.8rem !important;
+            }
+            .status-select {
+                padding: 0.3rem 0.4rem;
+                font-size: 0.75rem;
+            }
+            
+            /* Modales Responsivos */
+            .modal-content {
+                padding: 1.5rem;
+                border-radius: 20px;
+                width: 94%;
+                margin: 0 auto;
+            }
+            .modal-body {
+                max-height: 60vh;
+                margin-bottom: 1.5rem;
+            }
+            .modal-footer {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+            .modal-footer .btn-action {
+                flex: 1 1 100%;
+                justify-content: center;
+                padding: 0.75rem 1rem;
             }
         }
     </style>
@@ -755,6 +879,9 @@
     <!-- PANTALLA 2: Dashboard Administrativo -->
     <div class="dashboard-container" id="dashboard-container" style="display: none;">
         
+        <!-- Overlay de Sidebar móvil/tablet -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="sidebar-header">
@@ -803,12 +930,17 @@
         <main class="main-content">
             
             <!-- Header -->
-            <header class="main-header">
-                <div class="main-title">
-                    <h1 id="dashboard-title">Panel Administrativo</h1>
-                    <p id="dashboard-subtitle">Control de ventas, catálogo y procesamiento de pedidos en tiempo real.</p>
+            <header class="main-header" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                    <button id="btn-sidebar-toggle" class="btn-action secondary" style="display: none; padding: 0.5rem; border-radius: 10px; width: 42px; height: 42px; justify-content: center; align-items: center; border: 1px solid var(--border-color); cursor: pointer;">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <div class="main-title">
+                        <h1 id="dashboard-title">Panel Administrativo</h1>
+                        <p id="dashboard-subtitle">Control de ventas, catálogo y procesamiento de pedidos en tiempo real.</p>
+                    </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 1rem; flex-shrink: 0;">
                     <div style="text-align: right; display: none;" id="user-info-badge">
                         <p style="font-size: 0.85rem; font-weight: 600;" id="admin-user-name">Administrador</p>
                         <span style="font-size: 0.75rem; color: var(--success); font-weight: 500; display: inline-flex; align-items: center; gap: 0.2rem;">
@@ -1003,7 +1135,7 @@
                                 </div>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
                                 <div class="form-group">
                                     <label for="prod-sizes">Tallas Disponibles (Separadas por coma)</label>
                                     <input type="text" id="prod-sizes" class="form-control" placeholder="ej: S,M,L,XL (dejar vacío si no aplica)">
@@ -1093,6 +1225,10 @@
                         <p>Estado del Pedido</p>
                         <strong style="margin-top: 0.2rem;"><span id="modal-order-status" class="status-badge pendiente">Pendiente</span></strong>
                     </div>
+                    <div>
+                        <p>Total del Pedido</p>
+                        <strong id="modal-order-total" style="color: var(--accent); font-size: 1.15rem; margin-top: 0.2rem;">-</strong>
+                    </div>
                 </div>
 
                 <!-- Lista de Productos en Pedido -->
@@ -1106,6 +1242,50 @@
                 <button class="btn-action secondary" id="btn-modal-close-footer">Cerrar Detalles</button>
                 <a href="" target="_blank" class="btn-action" id="btn-modal-chat" style="background: #25D366; box-shadow: 0 4px 12px rgba(37,211,102,0.3);"><i data-lucide="message-circle"></i> Chatear por WhatsApp</a>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTRAR PAGO -->
+    <div class="modal" id="payment-modal">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3>Registrar Pago de Pedido</h3>
+                <button class="modal-close" id="btn-close-payment-modal"><i data-lucide="x"></i></button>
+            </div>
+            
+            <form id="payment-form">
+                <div class="modal-body" style="margin-bottom: 1.5rem;">
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.5;">
+                        Selecciona el método de pago del cliente para completar el pedido <strong id="payment-modal-order-id" style="color: var(--white);">#ROM-XXXX</strong>.
+                    </p>
+                    
+                    <div class="form-group">
+                        <label for="payment-method-select">Método de Pago</label>
+                        <select id="payment-method-select" class="form-control" style="background: rgba(15, 22, 42, 0.6);" required>
+                            <option value="Pago Móvil" selected>Pago Móvil</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Zelle">Zelle</option>
+                            <option value="Transferencia">Transferencia</option>
+                        </select>
+                    </div>
+
+                    <!-- Campo de Referencia: visible para Pago Móvil o Transferencia -->
+                    <div class="form-group" id="reference-group">
+                        <label for="payment-reference">Referencia (4 dígitos)</label>
+                        <input type="text" id="payment-reference" class="form-control" placeholder="Ej: 1234" maxlength="4" minlength="4" pattern="\d{4}" title="Debe contener exactamente 4 dígitos" required>
+                        <span style="font-size:0.75rem; color:var(--text-secondary); display:block; margin-top: 0.35rem; line-height: 1.4;">
+                            Ingresa los últimos 4 dígitos del número de referencia de la transacción.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-action secondary" id="btn-cancel-payment-modal">Cancelar</button>
+                    <button type="submit" class="btn-action" id="btn-confirm-payment" style="background: var(--success); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);">
+                        <i data-lucide="check-circle"></i> Confirmar Pago
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 

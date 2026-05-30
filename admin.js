@@ -31,6 +31,20 @@ const orderModal = document.getElementById('order-detail-modal');
 const btnCloseModal = document.getElementById('btn-close-modal');
 const btnCloseModalFooter = document.getElementById('btn-modal-close-footer');
 
+// Modal Registrar Pago
+const paymentModal = document.getElementById('payment-modal');
+const btnClosePaymentModal = document.getElementById('btn-close-payment-modal');
+const btnCancelPaymentModal = document.getElementById('btn-cancel-payment-modal');
+const paymentForm = document.getElementById('payment-form');
+const paymentMethodSelect = document.getElementById('payment-method-select');
+const paymentReferenceInput = document.getElementById('payment-reference');
+const referenceGroup = document.getElementById('reference-group');
+const paymentModalOrderId = document.getElementById('payment-modal-order-id');
+
+let pendingPaymentOrderId = null;
+let pendingPaymentStatus = null;
+
+
 // --- HASHING DE CONTRASEÑA ---
 /**
  * Hashea una contraseña usando SHA-256 nativo del navegador (hexadecimal)
@@ -283,8 +297,8 @@ function renderSales() {
     const tableSales = document.getElementById('table-all-sales');
     const salesTotalSpan = document.getElementById('sales-total-amount');
 
-    // Calcular monto total
-    const totalAmount = salesList.reduce((sum, s) => sum + (s.monto || 0), 0);
+    // Calcular monto total de forma segura convirtiendo a flotante para evitar concatenación
+    const totalAmount = salesList.reduce((sum, s) => sum + (parseFloat(s.monto) || 0), 0);
     if (salesTotalSpan) {
         salesTotalSpan.textContent = `(Total Facturado: $${totalAmount.toFixed(2)})`;
     }
@@ -306,13 +320,15 @@ function renderSales() {
             minute: '2-digit'
         });
 
+        const montoVal = parseFloat(s.monto) || 0.0;
+
         return `
             <tr>
                 <td><strong>#V-${s.id}</strong></td>
                 <td><code style="font-weight: 700; color: var(--primary);">${s.order_id}</code></td>
                 <td>${s.client_name}</td>
                 <td>${s.client_phone}</td>
-                <td style="font-weight: 700; color: var(--success);">$${parseFloat(s.monto).toFixed(2)}</td>
+                <td style="font-weight: 700; color: var(--success);">$${montoVal.toFixed(2)}</td>
                 <td><span style="background: rgba(34, 197, 94, 0.1); color: var(--success); padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">${s.metodo_pago}</span></td>
                 <td style="font-size: 0.85rem; color: var(--text-secondary);">${dateString}</td>
             </tr>
@@ -343,8 +359,8 @@ function renderMetrics() {
     const metricSalesCount = document.getElementById('metric-sales-count');
     
     if (metricSalesCount) {
-        // En Venezuela a veces los precios son cotizados (0.00), sumamos el valor real si existe
-        const totalSalesSum = completedOrders.reduce((sum, o) => sum + o.total_price, 0);
+        // En Venezuela a veces los precios son cotizados (0.00), sumamos el valor real si existe de forma segura
+        const totalSalesSum = completedOrders.reduce((sum, o) => sum + (parseFloat(o.total_price) || 0), 0);
         if (totalSalesSum > 0) {
             metricSalesCount.textContent = `$${totalSalesSum.toFixed(2)}`;
         } else {
@@ -359,10 +375,10 @@ function renderOrders() {
     const tableAll = document.getElementById('table-all-orders');
     const tableRecent = document.getElementById('table-recent-orders');
 
-    // Calcular totalizaciones
-    const totalOrdersSum = ordersList.reduce((sum, o) => sum + (o.total_price || 0), 0);
+    // Calcular totalizaciones de forma segura evitando concatenaciones de cadenas
+    const totalOrdersSum = ordersList.reduce((sum, o) => sum + (parseFloat(o.total_price) || 0), 0);
     const nonCancelledOrders = ordersList.filter(o => o.status !== 'cancelado');
-    const activeOrdersSum = nonCancelledOrders.reduce((sum, o) => sum + (o.total_price || 0), 0);
+    const activeOrdersSum = nonCancelledOrders.reduce((sum, o) => sum + (parseFloat(o.total_price) || 0), 0);
 
     const summarySpan = document.getElementById('orders-total-summary');
     if (summarySpan) {
@@ -443,21 +459,15 @@ function createOrderRowMarkup(order, includeStatusSelector = true) {
 // Actualizar estado de un pedido (Invocado desde onchange en la tabla)
 async function updateOrderStatus(orderId, newStatus) {
     try {
-        let paymentMethod = null;
         if (newStatus === 'completado') {
-            paymentMethod = prompt("Ingrese el método de pago del cliente (ej: Pago Móvil, Efectivo, Zelle, Transferencia):", "Pago Móvil");
-            if (paymentMethod === null) {
-                // El usuario presionó Cancelar, cancelamos el cambio de estado
-                refreshAllData();
-                return;
-            }
-            paymentMethod = paymentMethod.trim() || "WhatsApp / Por acordar";
+            openPaymentModal(orderId, newStatus);
+            return;
         }
 
         const response = await fetch('/api/orders', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: orderId, status: newStatus, paymentMethod: paymentMethod })
+            body: JSON.stringify({ id: orderId, status: newStatus, paymentMethod: null })
         });
 
         if (!response.ok) throw new Error('Error al actualizar estado');
@@ -511,6 +521,13 @@ async function viewOrderDetails(orderId) {
         statusBadge.className = `status-badge ${order.status}`;
         statusBadge.textContent = order.status.replace('_', ' ');
 
+        // Total del Pedido
+        const totalText = order.total_price > 0 ? `$${parseFloat(order.total_price).toFixed(2)}` : 'Cotización';
+        const totalElement = document.getElementById('modal-order-total');
+        if (totalElement) {
+            totalElement.textContent = totalText;
+        }
+
         // Items del pedido
         const itemsList = document.getElementById('modal-items-list');
         if (itemsList) {
@@ -523,8 +540,14 @@ async function viewOrderDetails(orderId) {
                     const iconMap = { shirt: 'shirt', coffee: 'coffee', crown: 'crown', scissors: 'scissors', 'circle-dot': 'circle-dot', link: 'link' };
                     const iconName = iconMap[item.product_id] || 'package';
 
+                    // Buscar precio en productsList para calcular subtotal
+                    const product = productsList.find(p => p.id === item.product_id);
+                    const hasPrice = product && parseFloat(product.price) > 0;
+                    const priceText = hasPrice ? `$${parseFloat(product.price).toFixed(2)}` : 'Cotización';
+                    const subtotalText = hasPrice ? `$${(parseFloat(product.price) * item.quantity).toFixed(2)}` : 'Cotización';
+
                     return `
-                        <div class="detail-item">
+                        <div class="detail-item" style="align-items: center;">
                             <div class="detail-item-info">
                                 <div class="detail-item-icon">
                                     <i data-lucide="${iconName}"></i>
@@ -534,8 +557,16 @@ async function viewOrderDetails(orderId) {
                                     <span>ID: ${item.product_id}${sizeText}</span>
                                 </div>
                             </div>
-                            <div class="detail-item-qty">
-                                x${item.quantity}
+                            <div style="text-align: right; display: flex; flex-direction: column; gap: 0.2rem; font-family: 'Outfit', sans-serif;">
+                                <div class="detail-item-qty" style="font-size: 1.05rem; font-weight: 600; color: var(--primary);">
+                                    x${item.quantity}
+                                </div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                                    Precio: ${priceText}
+                                </div>
+                                <div style="font-size: 0.8rem; font-weight: 500; color: var(--success);">
+                                    Subtotal: ${subtotalText}
+                                </div>
                             </div>
                         </div>
                     `;
@@ -570,6 +601,129 @@ if (btnCloseModalFooter) btnCloseModalFooter.addEventListener('click', closeModa
 if (orderModal) {
     orderModal.addEventListener('click', (e) => {
         if (e.target === orderModal) closeModal();
+    });
+}
+
+// --- LÓGICA DEL MODAL DE PAGO ---
+function openPaymentModal(orderId, newStatus) {
+    pendingPaymentOrderId = orderId;
+    pendingPaymentStatus = newStatus;
+    if (paymentModalOrderId) {
+        paymentModalOrderId.textContent = `#${orderId}`;
+    }
+    
+    // Resetear opciones a valores iniciales
+    if (paymentMethodSelect) {
+        paymentMethodSelect.value = "Pago Móvil";
+    }
+    if (paymentReferenceInput) {
+        paymentReferenceInput.value = "";
+    }
+    toggleReferenceField();
+    
+    if (paymentModal) {
+        paymentModal.classList.add('active');
+    }
+    lucide.createIcons();
+}
+
+function toggleReferenceField() {
+    if (!paymentMethodSelect) return;
+    const method = paymentMethodSelect.value;
+    if (method === "Pago Móvil" || method === "Transferencia") {
+        if (referenceGroup) referenceGroup.style.display = "block";
+        if (paymentReferenceInput) {
+            paymentReferenceInput.required = true;
+            paymentReferenceInput.setAttribute("required", "");
+        }
+    } else {
+        if (referenceGroup) referenceGroup.style.display = "none";
+        if (paymentReferenceInput) {
+            paymentReferenceInput.required = false;
+            paymentReferenceInput.removeAttribute("required");
+            paymentReferenceInput.value = "";
+        }
+    }
+}
+
+function closePaymentModal() {
+    if (paymentModal) {
+        paymentModal.classList.remove('active');
+    }
+    pendingPaymentOrderId = null;
+    pendingPaymentStatus = null;
+    refreshAllData(); // Revierte el valor seleccionado en las tablas/dropdowns al valor actual en DB
+}
+
+if (paymentMethodSelect) {
+    paymentMethodSelect.addEventListener('change', toggleReferenceField);
+}
+
+if (btnClosePaymentModal) btnClosePaymentModal.addEventListener('click', closePaymentModal);
+if (btnCancelPaymentModal) btnCancelPaymentModal.addEventListener('click', closePaymentModal);
+if (paymentModal) {
+    paymentModal.addEventListener('click', (e) => {
+        if (e.target === paymentModal) closePaymentModal();
+    });
+}
+
+if (paymentForm) {
+    paymentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const method = paymentMethodSelect ? paymentMethodSelect.value : "Pago Móvil";
+        let paymentMethodString = method;
+        
+        if (method === "Pago Móvil" || method === "Transferencia") {
+            const ref = paymentReferenceInput ? paymentReferenceInput.value.trim() : "";
+            if (!/^\d{4}$/.test(ref)) {
+                showToast("La referencia debe ser de exactamente 4 dígitos numéricos.", "warning");
+                return;
+            }
+            paymentMethodString = `${method} - Ref: ${ref}`;
+        }
+        
+        const orderId = pendingPaymentOrderId;
+        const status = pendingPaymentStatus;
+        
+        // Loader en el botón de confirmar
+        const btnConfirm = document.getElementById('btn-confirm-payment');
+        const originalHTML = btnConfirm ? btnConfirm.innerHTML : '';
+        if (btnConfirm) {
+            btnConfirm.disabled = true;
+            btnConfirm.innerHTML = '<i data-lucide="loader" class="spin"></i> Procesando...';
+            lucide.createIcons();
+        }
+        
+        try {
+            const response = await fetch('/api/orders', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: orderId, status: status, paymentMethod: paymentMethodString })
+            });
+
+            if (!response.ok) throw new Error('Error al actualizar estado');
+            
+            showToast(`Pedido #${orderId} completado y pago registrado con éxito.`, 'success');
+            
+            // Cerrar el modal limpiando variables de estado
+            if (paymentModal) {
+                paymentModal.classList.remove('active');
+            }
+            pendingPaymentOrderId = null;
+            pendingPaymentStatus = null;
+            
+            await refreshAllData();
+        } catch (err) {
+            console.error(err);
+            showToast('Error al registrar el pago del pedido.', 'error');
+        } finally {
+            if (btnConfirm) {
+                btnConfirm.disabled = false;
+                btnConfirm.innerHTML = originalHTML;
+                lucide.createIcons();
+            }
+        }
     });
 }
 
@@ -766,7 +920,37 @@ if (btnRefreshSales) {
 }
 
 // --- EJECUCIÓN AL CARGAR LA PÁGINA ---
-window.addEventListener('DOMContentLoaded', checkSession);
+window.addEventListener('DOMContentLoaded', () => {
+    checkSession();
+    
+    // Inicializar lógica de Sidebar colapsable en móvil y tablet
+    const sidebar = document.querySelector('.sidebar');
+    const btnSidebarToggle = document.getElementById('btn-sidebar-toggle');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    
+    if (btnSidebarToggle && sidebar && sidebarOverlay) {
+        btnSidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            sidebarOverlay.classList.toggle('active');
+        });
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+        });
+        
+        // Cerrar sidebar automáticamente al navegar a otra sección en pantallas móviles
+        const sidebarMenuLinks = document.querySelectorAll('.sidebar-link');
+        sidebarMenuLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                }
+            });
+        });
+    }
+});
 
 // Exponer funciones globales para controladores onclick en HTML
 window.updateOrderStatus = updateOrderStatus;

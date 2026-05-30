@@ -156,12 +156,12 @@ const iconMap = {
     "Llavero / Lanyard": "link"
 };
 
-const addToCart = (name, quantity = 1, icon = 'package', options = {}) => {
+const addToCart = (id, name, quantity = 1, icon = 'package', options = {}) => {
     const qty = parseInt(quantity);
 
-    // Create a unique key based on name and options (like size)
+    // Create a unique key based on id and options (like size)
     const optionsKey = Object.values(options).join('-');
-    const itemKey = optionsKey ? `${name}-${optionsKey}` : name;
+    const itemKey = optionsKey ? `${id}-${optionsKey}` : id;
 
     const existingItem = cart.find(item => item.key === itemKey);
 
@@ -428,6 +428,7 @@ const renderProducts = (products) => {
                             <button class="qty-btn-main plus" data-id="${p.id}">+</button>
                         </div>
                         <button class="cta-btn product-cta add-to-cart" 
+                            data-id="${p.id}"
                             data-name="${p.name}" 
                             data-input="qty-${p.id}" 
                             data-icon="${p.icon || 'package'}">Agregar</button>
@@ -498,6 +499,7 @@ const initCatalogDelegation = () => {
         // 3. Click en Agregar al Carrito
         const addBtn = e.target.closest('.add-to-cart');
         if (addBtn) {
+            const productId = addBtn.getAttribute('data-id');
             const productName = addBtn.getAttribute('data-name');
             const inputId = addBtn.getAttribute('data-input');
             const iconName = addBtn.getAttribute('data-icon');
@@ -513,7 +515,7 @@ const initCatalogDelegation = () => {
                 }
             }
 
-            addToCart(productName, quantity, iconName, options);
+            addToCart(productId, productName, quantity, iconName, options);
 
             // Resetear cantidad a 1
             if (input) input.value = 1;

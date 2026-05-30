@@ -58,6 +58,7 @@ export async function onRequestPost(context) {
     const { env, request } = context;
     const db = env.DB || env.sublimado;
 
+    let productId = "";
     try {
         const data = await request.json();
         const { id, name, description, price, category, icon, image_url, sizes, active } = data;
@@ -69,11 +70,22 @@ export async function onRequestPost(context) {
             });
         }
 
+        productId = id.toLowerCase().trim();
+
+        // Validar si el ID único ya existe en la base de datos antes de intentar insertar
+        const existing = await db.prepare("SELECT id FROM products WHERE id = ?").bind(productId).first();
+        if (existing) {
+            return new Response(JSON.stringify({ error: `El ID único (Slug) "${productId}" ya está registrado para otro producto. Por favor elige uno diferente.` }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
         await db.prepare(
             "INSERT INTO products (id, name, description, price, category, icon, image_url, sizes, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
         )
         .bind(
-            id.toLowerCase().trim(),
+            productId,
             name.trim(),
             description || "",
             parseFloat(price) || 0.0,
@@ -90,7 +102,11 @@ export async function onRequestPost(context) {
             headers: { "Content-Type": "application/json" }
         });
     } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), {
+        let errorMessage = err.message;
+        if (err.message.includes("UNIQUE constraint failed: products.id") || err.message.includes("SQLITE_CONSTRAINT")) {
+            errorMessage = `El ID único (Slug) "${productId}" ya está registrado. Por favor, usa otro ID.`;
+        }
+        return new Response(JSON.stringify({ error: errorMessage }), {
             status: 500,
             headers: { "Content-Type": "application/json" }
         });
