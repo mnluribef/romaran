@@ -843,12 +843,20 @@ function startEditProduct(productId) {
     btnSubmitProduct.innerHTML = '<i data-lucide="save"></i> Actualizar Producto';
     btnCancelEdit.style.display = 'inline-flex';
     
-    // Enfocar
-    document.getElementById('prod-name').focus();
     lucide.createIcons();
 
-    // Hacer scroll suave hacia el formulario
-    productForm.scrollIntoView({ behavior: 'smooth' });
+    // Expandir formulario si está colapsado al querer editar
+    const collapseEl = document.getElementById('product-form-collapse');
+    const collapseIcon = document.getElementById('product-form-icon');
+    if (collapseEl && !collapseEl.classList.contains('expanded')) {
+        collapseEl.classList.add('expanded');
+        if (collapseIcon) collapseIcon.style.transform = 'rotate(180deg)';
+    }
+
+    // Hacer scroll suave hacia el título del formulario (Editando Producto)
+    if (formProductTitle) {
+        formProductTitle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 }
 
 // Cancelar Edición
@@ -860,6 +868,14 @@ function resetProductForm() {
     btnSubmitProduct.innerHTML = '<i data-lucide="plus-circle"></i> Guardar Producto';
     btnCancelEdit.style.display = 'none';
     lucide.createIcons();
+
+    // Colapsar formulario de nuevo
+    const collapseEl = document.getElementById('product-form-collapse');
+    const collapseIcon = document.getElementById('product-form-icon');
+    if (collapseEl && collapseEl.classList.contains('expanded')) {
+        collapseEl.classList.remove('expanded');
+        if (collapseIcon) collapseIcon.style.transform = 'rotate(0deg)';
+    }
 }
 
 if (btnCancelEdit) btnCancelEdit.addEventListener('click', resetProductForm);
@@ -919,9 +935,22 @@ if (btnRefreshSales) {
     });
 }
 
-// --- EJECUCIÓN AL CARGAR LA PÁGINA ---
 window.addEventListener('DOMContentLoaded', () => {
     checkSession();
+    
+    // Inicializar lógica de colapsado de formulario de productos
+    const productFormHeader = document.getElementById('product-form-header');
+    const productFormCollapse = document.getElementById('product-form-collapse');
+    const productFormIcon = document.getElementById('product-form-icon');
+    
+    if (productFormHeader && productFormCollapse) {
+        productFormHeader.addEventListener('click', () => {
+            const isExpanded = productFormCollapse.classList.toggle('expanded');
+            if (productFormIcon) {
+                productFormIcon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        });
+    }
     
     // Inicializar lógica de Sidebar colapsable en móvil y tablet
     const sidebar = document.querySelector('.sidebar');

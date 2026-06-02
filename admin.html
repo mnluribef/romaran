@@ -837,6 +837,19 @@
                 padding: 0.75rem 1rem;
             }
         }
+
+        /* Estilo para colapsar formulario de producto - CAVEMAN PREMIUM STYLE */
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
+        .collapsible-content.expanded {
+            max-height: 1200px;
+            opacity: 1;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -1095,70 +1108,75 @@
             <div id="section-inventory" class="dashboard-section">
                 
                 <!-- Añadir Producto -->
-                <div class="content-card" style="margin-bottom: 2.5rem;">
-                    <div class="card-header">
+                <div class="content-card" style="margin-bottom: 2.5rem;" id="product-form-card">
+                    <div class="card-header" id="product-form-header" style="cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center;">
                         <h2 id="form-product-title">Registrar Nuevo Producto</h2>
+                        <button type="button" class="action-icon-btn" style="pointer-events: none;" id="btn-toggle-product-form">
+                            <i data-lucide="chevron-down" id="product-form-icon" style="transition: var(--transition);"></i>
+                        </button>
                     </div>
-                    <div style="padding: 2rem;">
-                        <form id="product-form">
-                            <input type="hidden" id="prod-method" value="POST"> <!-- POST o PUT -->
-                            
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-                                <div class="form-group">
-                                    <label for="prod-id">ID Único (Slug)</label>
-                                    <input type="text" id="prod-id" class="form-control" placeholder="ej: taza_magica" required>
-                                    <span style="font-size:0.75rem; color:var(--text-secondary);">Solo letras minúsculas, números o guiones bajos.</span>
+                    <div id="product-form-collapse" class="collapsible-content">
+                        <div style="padding: 2rem;">
+                            <form id="product-form">
+                                <input type="hidden" id="prod-method" value="POST"> <!-- POST o PUT -->
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                                    <div class="form-group">
+                                        <label for="prod-id">ID Único (Slug)</label>
+                                        <input type="text" id="prod-id" class="form-control" placeholder="ej: taza_magica" required>
+                                        <span style="font-size:0.75rem; color:var(--text-secondary);">Solo letras minúsculas, números o guiones bajos.</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prod-name">Nombre del Producto</label>
+                                        <input type="text" id="prod-name" class="form-control" placeholder="ej: Taza Mágica Sublimada" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prod-category">Categoría</label>
+                                        <input type="text" id="prod-category" class="form-control" placeholder="ej: tazas, vestimenta, accesorios">
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="prod-name">Nombre del Producto</label>
-                                    <input type="text" id="prod-name" class="form-control" placeholder="ej: Taza Mágica Sublimada" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="prod-category">Categoría</label>
-                                    <input type="text" id="prod-category" class="form-control" placeholder="ej: tazas, vestimenta, accesorios">
-                                </div>
-                            </div>
 
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
-                                <div class="form-group">
-                                    <label for="prod-price">Precio Referencial ($)</label>
-                                    <input type="number" id="prod-price" class="form-control" step="0.01" value="0.00">
-                                    <span style="font-size:0.75rem; color:var(--text-secondary);">Pon 0.00 para marcar como "Cotizar por WhatsApp".</span>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                                    <div class="form-group">
+                                        <label for="prod-price">Precio Referencial ($)</label>
+                                        <input type="number" id="prod-price" class="form-control" step="0.01" value="0.00">
+                                        <span style="font-size:0.75rem; color:var(--text-secondary);">Pon 0.00 para marcar como "Cotizar por WhatsApp".</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prod-icon">Icono (Lucide)</label>
+                                        <input type="text" id="prod-icon" class="form-control" placeholder="ej: coffee, shirt, crown, scissors">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prod-image">URL de Imagen</label>
+                                        <input type="text" id="prod-image" class="form-control" placeholder="ej: assets/product_taza.png" required>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="prod-icon">Icono (Lucide)</label>
-                                    <input type="text" id="prod-icon" class="form-control" placeholder="ej: coffee, shirt, crown, scissors">
-                                </div>
-                                <div class="form-group">
-                                    <label for="prod-image">URL de Imagen</label>
-                                    <input type="text" id="prod-image" class="form-control" placeholder="ej: assets/product_taza.png" required>
-                                </div>
-                            </div>
 
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                                <div class="form-group">
-                                    <label for="prod-sizes">Tallas Disponibles (Separadas por coma)</label>
-                                    <input type="text" id="prod-sizes" class="form-control" placeholder="ej: S,M,L,XL (dejar vacío si no aplica)">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                                    <div class="form-group">
+                                        <label for="prod-sizes">Tallas Disponibles (Separadas por coma)</label>
+                                        <input type="text" id="prod-sizes" class="form-control" placeholder="ej: S,M,L,XL (dejar vacío si no aplica)">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="prod-active">Estado</label>
+                                        <select id="prod-active" class="form-control">
+                                            <option value="1">Activo (Visible en web)</option>
+                                            <option value="0">Inactivo (Oculto)</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="prod-active">Estado</label>
-                                    <select id="prod-active" class="form-control">
-                                        <option value="1">Activo (Visible en web)</option>
-                                        <option value="0">Inactivo (Oculto)</option>
-                                    </select>
+
+                                <div class="form-group" style="margin-bottom: 2rem;">
+                                    <label for="prod-description">Descripción</label>
+                                    <textarea id="prod-description" class="form-control" rows="3" placeholder="Describe los detalles de calidad, materiales y acabados de sublimación..."></textarea>
                                 </div>
-                            </div>
 
-                            <div class="form-group" style="margin-bottom: 2rem;">
-                                <label for="prod-description">Descripción</label>
-                                <textarea id="prod-description" class="form-control" rows="3" placeholder="Describe los detalles de calidad, materiales y acabados de sublimación..."></textarea>
-                            </div>
-
-                            <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-                                <button type="button" class="btn-action secondary" id="btn-cancel-edit" style="display: none;">Cancelar Edición</button>
-                                <button type="submit" class="btn-action" id="btn-submit-product"><i data-lucide="plus-circle"></i> Guardar Producto</button>
-                            </div>
-                        </form>
+                                <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                                    <button type="button" class="btn-action secondary" id="btn-cancel-edit" style="display: none;">Cancelar Edición</button>
+                                    <button type="submit" class="btn-action" id="btn-submit-product"><i data-lucide="plus-circle"></i> Guardar Producto</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
