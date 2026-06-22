@@ -535,7 +535,7 @@ async function viewOrderDetails(orderId) {
                 itemsList.innerHTML = `<p style="color:var(--text-secondary); text-align:center;">No hay detalles de productos registrados.</p>`;
             } else {
                 itemsList.innerHTML = order.items.map(item => {
-                    const sizeText = item.size ? ` [Talla: ${item.size}]` : '';
+                    const sizeText = item.size ? (item.size.includes(':') ? ` [${item.size}]` : ` [Talla: ${item.size}]`) : '';
                     // Mapear icono
                     const iconMap = { shirt: 'shirt', coffee: 'coffee', crown: 'crown', scissors: 'scissors', 'circle-dot': 'circle-dot', link: 'link' };
                     const iconName = iconMap[item.product_id] || 'package';

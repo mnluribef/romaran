@@ -1476,3 +1476,144 @@ a.footer-contact-link:hover {
     box-shadow: 0 0 10px rgba(255, 20, 147, 0.15);
     background-color: var(--white) !important;
 }
+
+/* Category Filters Styling */
+.category-filter-btn {
+    background: var(--white);
+    color: var(--text-light);
+    border: 1px solid rgba(0,0,0,0.1);
+    padding: 0.6rem 1.4rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.category-filter-btn:hover {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.category-filter-btn.active {
+    background: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(0, 194, 255, 0.25);
+}
+
+/* Color swatch and dynamic attribute selectors */
+.color-swatch-container {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 0.3rem;
+}
+
+.color-swatch-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--white);
+    outline: 1px solid rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.color-swatch-btn:hover {
+    transform: scale(1.15);
+}
+
+.color-swatch-btn.active {
+    outline: 2px solid var(--accent);
+    transform: scale(1.1);
+}
+
+.color-swatch-btn.active::after {
+    content: '✓';
+    color: var(--white);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+/* Specific styling for black checkmark on white/yellow swatch */
+.color-swatch-btn.active.light-color::after {
+    color: var(--text-dark);
+    text-shadow: none;
+}
+
+.attribute-options-group {
+    margin-top: 0.8rem;
+    margin-bottom: 0.8rem;
+}
+
+.attribute-options-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+/* Option group row style */
+.attribute-selector {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.attribute-btn {
+    background: var(--white);
+    border: 1px solid rgba(0,0,0,0.15);
+    color: var(--text-dark);
+    padding: 0.4rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.attribute-btn:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.attribute-btn.active {
+    background: var(--primary);
+    color: var(--white);
+    border-color: var(--primary);
+    box-shadow: 0 2px 6px rgba(0, 194, 255, 0.2);
+}
+
+.product-options {
+    margin-bottom: 1rem;
+    border-top: 1px dashed rgba(0,0,0,0.06);
+    padding-top: 0.8rem;
+}
+
+/* Cart item option label styling */
+.cart-item-option {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-top: 0.15rem;
+    background: rgba(0,0,0,0.03);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    width: fit-content;
+}

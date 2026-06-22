@@ -30,6 +30,41 @@ export async function onRequestGet(context) {
             products = results;
         }
 
+        // Cargar y agrupar atributos dinámicos
+        const { results: allAttributes } = await db.prepare("SELECT * FROM product_attributes").all();
+        const attrsMap = {};
+        for (const attr of allAttributes) {
+            if (!attrsMap[attr.product_id]) {
+                attrsMap[attr.product_id] = [];
+            }
+            let parsedValues = [];
+            try {
+                parsedValues = JSON.parse(attr.attr_values);
+            } catch (e) {
+                parsedValues = attr.attr_values ? attr.attr_values.split(",") : [];
+            }
+            let parsedPriceMatrix = {};
+            try {
+                parsedPriceMatrix = JSON.parse(attr.price_matrix);
+            } catch (e) {
+                parsedPriceMatrix = {};
+            }
+            attrsMap[attr.product_id].push({
+                id: attr.id,
+                key: attr.attr_key,
+                label: attr.attr_label,
+                values: parsedValues,
+                type: attr.attr_type || 'select',
+                price_matrix: parsedPriceMatrix,
+                required: attr.required === 1
+            });
+        }
+
+        // Adjuntar atributos a cada producto
+        for (const product of products) {
+            product.attributes = attrsMap[product.id] || [];
+        }
+
         const cacheControl = isAdminMode 
             ? "no-store, no-cache, must-revalidate" 
             : "public, max-age=5"; // Cache corto de 5s para catálogo público

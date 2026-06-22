@@ -165,13 +165,14 @@ const iconMap = {
 const addToCart = (id, name, quantity = 1, icon = 'package', options = {}) => {
     const qty = parseInt(quantity);
 
-    // Create a unique key based on id and options (like size)
-    const optionsKey = Object.values(options).join('-');
+    // Crear llave única basada en id y opciones ordenadas consistentemente
+    const sortedOptionValues = Object.keys(options).sort().map(k => options[k]);
+    const optionsKey = sortedOptionValues.join('-');
     const itemKey = optionsKey ? `${id}-${optionsKey}` : id;
 
     const existingItem = cart.find(item => item.key === itemKey);
 
-    // Use mapped icon if provided icon is default
+    // Usar icono mapeado si el icono provisto es el genérico
     const finalIcon = (icon === 'package' && iconMap[name]) ? iconMap[name] : icon;
 
     if (existingItem) {
@@ -182,7 +183,11 @@ const addToCart = (id, name, quantity = 1, icon = 'package', options = {}) => {
     saveCart();
     updateCartCount();
 
-    const optionText = options.size ? ` (Talla ${options.size})` : "";
+    let optionText = "";
+    const optionList = Object.entries(options).filter(([_, v]) => v).map(([_, v]) => v);
+    if (optionList.length > 0) {
+        optionText = ` (${optionList.join(', ')})`;
+    }
     showToast(`¡Añadido ${qty}x ${name}${optionText}!`);
 };
 
@@ -273,7 +278,20 @@ const renderCart = () => {
 
     cartItemsContainer.innerHTML = cart.map(item => {
         const icon = item.icon && item.icon !== 'package' ? item.icon : (iconMap[item.name] || 'package');
-        const sizeText = item.options && item.options.size ? `<span class="cart-item-option">Talla: ${item.options.size}</span>` : "";
+        
+        let sizeText = "";
+        if (item.options && typeof item.options === 'object') {
+            const labels = {
+                size: 'Talla',
+                color: 'Color',
+                finish: 'Acabado',
+                capacity: 'Capacidad'
+            };
+            sizeText = Object.entries(item.options)
+                .filter(([_, v]) => v)
+                .map(([k, v]) => `<span class="cart-item-option">${labels[k] || k.charAt(0).toUpperCase() + k.slice(1)}: ${v}</span>`)
+                .join('');
+        }
 
         return `
             <div class="cart-item">
@@ -282,7 +300,9 @@ const renderCart = () => {
                         <i data-lucide="${icon}" class="item-icon"></i>
                         <div class="item-details">
                             <h4>${item.name}</h4>
-                            ${sizeText}
+                            <div style="display: flex; flex-direction: column; gap: 0.2rem; margin-top: 0.2rem;">
+                                ${sizeText}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -346,8 +366,20 @@ if (whatsappOrderBtn) {
                 let message = `¡Hola SubliColor! 👋\n\nHe realizado un pedido en la web.\n*Número de Pedido:* #${orderId}\n*Cliente:* ${clientName} (${clientPhone})\n\n*Productos del pedido:*\n`;
 
                 cart.forEach(item => {
-                    const size = item.options && item.options.size ? ` [Talla: ${item.options.size}]` : "";
-                    message += `✅ ${item.qty}x ${item.name}${size}\n`;
+                    let optionsString = "";
+                    if (item.options && typeof item.options === 'object') {
+                        const entries = Object.entries(item.options).filter(([_, v]) => v);
+                        if (entries.length > 0) {
+                            const labels = {
+                                size: 'Talla',
+                                color: 'Color',
+                                finish: 'Acabado',
+                                capacity: 'Capacidad'
+                            };
+                            optionsString = " [" + entries.map(([k, v]) => `${labels[k] || k.charAt(0).toUpperCase() + k.slice(1)}: ${v}`).join(', ') + "]";
+                        }
+                    }
+                    message += `✅ ${item.qty}x ${item.name}${optionsString}\n`;
                 });
 
                 const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -386,27 +418,147 @@ if (whatsappOrderBtn) {
     });
 }
 
+// --- VARIABLES GLOBALES DEL CATÁLOGO ---
+let catalogProducts = [];
+let activeCategory = 'all';
+
+const categoryNames = {
+    'all': 'Todos',
+    'apparel': 'Vestimenta',
+    'mug': 'Hogar y Tazas',
+    'accessory': 'Accesorios',
+    'print': 'Impresión'
+};
+
+const categoryIcons = {
+    'all': 'package',
+    'apparel': 'shirt',
+    'mug': 'coffee',
+    'accessory': 'crown',
+    'print': 'scissors'
+};
+
+const colorMap = {
+    'blanco': '#ffffff',
+    'negro': '#1a1a1a',
+    'rojo': '#e63946',
+    'azul': '#1d3557',
+    'amarillo': '#ffb703',
+    'verde': '#2a9d8f',
+    'rosado': '#ffb5a7',
+    'gris': '#8d99ae'
+};
+
+// Render category filters dynamically based on active products
+const renderCategoryFilters = (products) => {
+    const filtersContainer = document.getElementById('category-filters');
+    if (!filtersContainer) return;
+
+    const activeTypes = new Set(products.map(p => p.type_id).filter(Boolean));
+    const typesToRender = ['all', ...Array.from(activeTypes)];
+
+    filtersContainer.innerHTML = typesToRender.map(type => {
+        const name = categoryNames[type] || type.charAt(0).toUpperCase() + type.slice(1);
+        const icon = categoryIcons[type] || 'package';
+        const isActive = activeCategory === type;
+
+        return `
+            <button class="category-filter-btn ${isActive ? 'active' : ''}" data-category="${type}">
+                <i data-lucide="${icon}" style="width: 16px; height: 16px;"></i>
+                ${name}
+            </button>
+        `;
+    }).join('');
+
+    lucide.createIcons();
+};
+
+// Category filters click event listener
+const initCategoryFilters = () => {
+    const filtersContainer = document.getElementById('category-filters');
+    if (!filtersContainer) return;
+
+    filtersContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.category-filter-btn');
+        if (!btn) return;
+
+        const category = btn.getAttribute('data-category');
+        activeCategory = category;
+
+        filtersContainer.querySelectorAll('.category-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        renderProducts(catalogProducts);
+    });
+};
+
 // Render dynamic products cards
 const renderProducts = (products) => {
     const container = document.getElementById('catalog-container');
     if (!container) return;
 
-    if (products.length === 0) {
+    // Filtrar por categoría activa
+    const filteredProducts = activeCategory === 'all'
+        ? products
+        : products.filter(p => p.type_id === activeCategory);
+
+    if (filteredProducts.length === 0) {
         container.innerHTML = `
             <div style="grid-column: 1/-1; text-align: center; padding: 3rem 0; color: var(--text-secondary);">
-                <p>No hay productos activos en el catálogo actualmente.</p>
+                <p>No hay productos activos en esta categoría actualmente.</p>
             </div>
         `;
         return;
     }
 
-    container.innerHTML = products.map(p => {
-        const sizesHtml = p.sizes ? `
-            <div class="product-options">
-                <span>Talla:</span>
-                <div class="size-selector" data-product="${p.id}">
+    container.innerHTML = filteredProducts.map(p => {
+        // Generar atributos dinámicos
+        let attributesHtml = "";
+        if (p.attributes && p.attributes.length > 0) {
+            attributesHtml = p.attributes.map(attr => {
+                let optionsHtml = "";
+                if (attr.type === 'color_swatch') {
+                    optionsHtml = `
+                        <div class="color-swatch-container" data-attribute="${attr.key}" data-product="${p.id}">
+                            ${attr.values.map((val, idx) => {
+                                const hex = colorMap[val.toLowerCase().trim()] || val;
+                                const isLight = ['blanco', 'amarillo', 'beige', 'white', 'yellow'].includes(val.toLowerCase().trim());
+                                const lightClass = isLight ? 'light-color' : '';
+                                return `
+                                    <button class="color-swatch-btn ${idx === 0 ? 'active' : ''} ${lightClass}" 
+                                        style="background-color: ${hex};" 
+                                        data-value="${val}" 
+                                        title="${val}"></button>
+                                `;
+                            }).join('')}
+                        </div>
+                    `;
+                } else {
+                    optionsHtml = `
+                        <div class="attribute-selector" data-attribute="${attr.key}" data-product="${p.id}">
+                            ${attr.values.map((val, idx) => `
+                                <button class="attribute-btn ${idx === 0 ? 'active' : ''}" data-value="${val}">${val}</button>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="attribute-options-group">
+                        <label>${attr.label}:</label>
+                        ${optionsHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Tallas legadas fallback si no hay atributo size dinámico
+        const legacySizesHtml = (p.sizes && (!p.attributes || !p.attributes.some(a => a.key === 'size'))) ? `
+            <div class="attribute-options-group">
+                <label>Talla:</label>
+                <div class="attribute-selector" data-attribute="size" data-product="${p.id}">
                     ${p.sizes.split(',').map((size, idx) => `
-                        <button class="size-btn ${idx === 0 ? 'active' : ''}" data-size="${size}">${size}</button>
+                        <button class="attribute-btn ${idx === 0 ? 'active' : ''}" data-value="${size}">${size}</button>
                     `).join('')}
                 </div>
             </div>
@@ -426,7 +578,8 @@ const renderProducts = (products) => {
                         ${p.price > 0 ? `$${parseFloat(p.price).toFixed(2)}` : 'A consultar'}
                     </div>
                     <p class="product-desc" style="min-height: auto; margin-bottom: 1.2rem;">${p.description || ''}</p>
-                    ${sizesHtml}
+                    ${attributesHtml}
+                    ${legacySizesHtml}
                     <div class="product-actions">
                         <div class="main-qty-selector">
                             <button class="qty-btn-main minus" data-id="${p.id}">-</button>
@@ -454,6 +607,8 @@ const fetchCatalog = async () => {
         const response = await fetch('/api/products');
         if (!response.ok) throw new Error('Error al cargar catálogo');
         const products = await response.json();
+        catalogProducts = products;
+        renderCategoryFilters(products);
         renderProducts(products);
     } catch (err) {
         console.error(err);
@@ -476,12 +631,12 @@ const initCatalogDelegation = () => {
     if (!container) return;
 
     container.addEventListener('click', (e) => {
-        // 1. Click en selector de Talla
-        const sizeBtn = e.target.closest('.size-btn');
-        if (sizeBtn) {
-            const selector = sizeBtn.parentElement;
-            selector.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
-            sizeBtn.classList.add('active');
+        // 1. Click en cualquier botón de opción (atributo o talla legada)
+        const optionBtn = e.target.closest('.attribute-btn, .color-swatch-btn');
+        if (optionBtn) {
+            const selector = optionBtn.parentElement;
+            selector.querySelectorAll('.attribute-btn, .color-swatch-btn').forEach(btn => btn.classList.remove('active'));
+            optionBtn.classList.add('active');
             return;
         }
 
@@ -515,10 +670,17 @@ const initCatalogDelegation = () => {
             const options = {};
             const productCard = addBtn.closest('.product-card');
             if (productCard) {
-                const activeSize = productCard.querySelector('.size-btn.active');
-                if (activeSize) {
-                    options.size = activeSize.getAttribute('data-size');
-                }
+                const activeSelectors = productCard.querySelectorAll('[data-attribute]');
+                activeSelectors.forEach(selector => {
+                    const attrKey = selector.getAttribute('data-attribute');
+                    const activeBtn = selector.querySelector('.active');
+                    if (activeBtn) {
+                        const val = activeBtn.getAttribute('data-value');
+                        if (val) {
+                            options[attrKey] = val;
+                        }
+                    }
+                });
             }
 
             addToCart(productId, productName, quantity, iconName, options);
@@ -534,6 +696,7 @@ window.addEventListener('load', () => {
     initReveal();
     initSlider();
     fetchCatalog();
+    initCategoryFilters();
     initCatalogDelegation();
     updateCartCount();
 });

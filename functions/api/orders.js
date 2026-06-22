@@ -128,7 +128,22 @@ export async function onRequestPost(context) {
             const prodId = item.key.split("-")[0];
             const price = productPriceMap[prodId] || 0.0;
             const qty = parseInt(item.qty) || 1;
-            const size = item.options?.size || null;
+            
+            let size = null;
+            if (item.options && typeof item.options === 'object') {
+                const entries = Object.entries(item.options).filter(([_, v]) => v);
+                if (entries.length === 1 && entries[0][0] === 'size') {
+                    size = entries[0][1];
+                } else if (entries.length > 0) {
+                    const labels = {
+                        size: 'Talla',
+                        color: 'Color',
+                        finish: 'Acabado',
+                        capacity: 'Capacidad'
+                    };
+                    size = entries.map(([k, v]) => `${labels[k] || k.charAt(0).toUpperCase() + k.slice(1)}: ${v}`).join(', ');
+                }
+            }
 
             totalItems += qty;
             totalPrice += price * qty;
