@@ -5,12 +5,9 @@ import { verifySession, unauthorizedResponse } from "./_auth.js";
  * Genera un ID de pedido único y corto (ej: SUB-X9F4E)
  */
 function generateOrderId() {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let code = "";
-    for (let i = 0; i < 5; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return `SUB-${code}`;
+    const ts = Date.now().toString(36).toUpperCase();
+    const rand = Math.random().toString(36).substring(2, 5).toUpperCase();
+    return `SUB-${ts}${rand}`;
 }
 
 /**
@@ -138,14 +135,15 @@ export async function onRequestPost(context) {
 
             statements.push(
                 db.prepare(
-                    "INSERT INTO order_items (order_id, product_id, product_name, size, quantity) VALUES (?, ?, ?, ?, ?)"
+                    "INSERT INTO order_items (order_id, product_id, product_name, size, quantity, unit_price) VALUES (?, ?, ?, ?, ?, ?)"
                 )
                 .bind(
                     orderId,
                     prodId,
                     item.name,
                     size,
-                    qty
+                    qty,
+                    price
                 )
             );
         }

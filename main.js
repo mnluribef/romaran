@@ -1,3 +1,9 @@
+// --- CONFIGURACIÓN GLOBAL DEL NEGOCIO ---
+const CONFIG = {
+    WHATSAPP_NUMBER: "584124756191", // Formato internacional sin caracteres especiales (ej: 584124756191)
+    DEFAULT_CURRENCY: "$"
+};
+
 // Scroll Reveal Animation (Optimized via IntersectionObserver)
 const initReveal = () => {
     const reveals = document.querySelectorAll('.reveal');
@@ -336,7 +342,7 @@ if (whatsappOrderBtn) {
             
             if (result.success) {
                 const orderId = result.orderId;
-                const phoneNumber = "584124756191";
+                const phoneNumber = CONFIG.WHATSAPP_NUMBER;
                 let message = `¡Hola SubliColor! 👋\n\nHe realizado un pedido en la web.\n*Número de Pedido:* #${orderId}\n*Cliente:* ${clientName} (${clientPhone})\n\n*Productos del pedido:*\n`;
 
                 cart.forEach(item => {

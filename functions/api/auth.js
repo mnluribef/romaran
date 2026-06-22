@@ -1,5 +1,4 @@
-// Controlador de Autenticación - SUBLICOLOR
-import { verifySession } from "./_auth.js";
+import { verifySession, generateSalt, hashPasswordPBKDF2 } from "./_auth.js";
 
 /**
  * GET /api/auth - Verifica el estado de la sesión actual
@@ -36,11 +35,39 @@ export async function onRequestPost(context) {
         }
 
         // Buscar usuario en base de datos
-        const user = await db.prepare("SELECT * FROM users WHERE username = ? AND password_hash = ?")
-            .bind(username.toLowerCase(), passwordHash)
+        const user = await db.prepare("SELECT * FROM users WHERE username = ?")
+            .bind(username.toLowerCase())
             .first();
 
         if (!user) {
+            return new Response(JSON.stringify({ error: "Credenciales inválidas." }), {
+                status: 401,
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        let isMatch = false;
+
+        if (!user.password_salt) {
+            // Caso 1: Usuario legacy con SHA-256 plano o columna no inicializada
+            isMatch = (user.password_hash === passwordHash);
+            
+            if (isMatch) {
+                // Migrar automáticamente al nuevo formato PBKDF2
+                const newSalt = generateSalt();
+                const newHash = await hashPasswordPBKDF2(passwordHash, newSalt);
+                
+                await db.prepare("UPDATE users SET password_hash = ?, password_salt = ? WHERE id = ?")
+                    .bind(newHash, newSalt, user.id)
+                    .run();
+            }
+        } else {
+            // Caso 2: Usuario migrado con PBKDF2
+            const calculatedHash = await hashPasswordPBKDF2(passwordHash, user.password_salt);
+            isMatch = (user.password_hash === calculatedHash);
+        }
+
+        if (!isMatch) {
             return new Response(JSON.stringify({ error: "Credenciales inválidas." }), {
                 status: 401,
                 headers: { "Content-Type": "application/json" }

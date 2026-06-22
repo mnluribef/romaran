@@ -56,6 +56,58 @@ export async function verifySession(context) {
 }
 
 /**
+ * Convierte un string hexadecimal a Uint8Array
+ */
+export function hexToBytes(hex) {
+    const bytes = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = parseInt(hex.substring(i * 2, i * 2 + 2), 16);
+    }
+    return bytes;
+}
+
+/**
+ * Convierte un Uint8Array a un string hexadecimal
+ */
+export function bytesToHex(bytes) {
+    return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Genera un salt aleatorio en formato hexadecimal (128 bits)
+ */
+export function generateSalt() {
+    const saltBytes = new Uint8Array(16);
+    crypto.getRandomValues(saltBytes);
+    return bytesToHex(saltBytes);
+}
+
+/**
+ * Hashea una contraseña (recibida como hash SHA-256) usando PBKDF2 con 100,000 iteraciones
+ */
+export async function hashPasswordPBKDF2(passwordHash, saltHex) {
+    const encoder = new TextEncoder();
+    const passwordKey = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(passwordHash),
+        { name: "PBKDF2" },
+        false,
+        ["deriveBits"]
+    );
+    const derivedKeyBits = await crypto.subtle.deriveBits(
+        {
+            name: "PBKDF2",
+            salt: hexToBytes(saltHex),
+            iterations: 100000,
+            hash: "SHA-256"
+        },
+        passwordKey,
+        256
+    );
+    return bytesToHex(new Uint8Array(derivedKeyBits));
+}
+
+/**
  * Retorna una respuesta de error 401 Unauthorized
  */
 export function unauthorizedResponse() {
@@ -66,3 +118,4 @@ export function unauthorizedResponse() {
         }
     });
 }
+
